@@ -1,0 +1,15 @@
+{
+  "name": "@shipyard/readiness",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Evidence-backed production readiness scoring",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b"
+  },
+  "dependencies": {
+    "@shipyard/rulebook": "*",
+    "@shipyard/shared": "*"
+  }
+}

@@ -65,11 +65,15 @@ changing anything in `packages/cli-bridge`. The short version:
 
 ```
 packages/
-  shared/       types and the IPC contract
-  cli-bridge/   PTY spawn, TUI parsing, session state machine   <- the hard part
+  shared/         types and the IPC contract
+  cli-bridge/     PTY spawn, TUI parsing, session state machine   <- the hard part
+  rulebook/       what a project owes its users, evaluated from evidence
+  readiness/      the score, and what stands between here and launch
+  project-state/  lifecycle states and evidence-backed transitions
 apps/
-  desktop/      the Electron app
-site/           the public landing page, deployed to GitHub Pages
+  desktop/        the Electron app
+shipyard-catalog/ rules as data, outside application code
+site/             the public landing page, deployed to GitHub Pages
 docs/
 ```
 
@@ -77,6 +81,7 @@ docs/
 
 | Document | What it settles |
 | --- | --- |
+| [V1-POC-PLAN](docs/V1-POC-PLAN.md) | What is being built, in what order, and what is deliberately held |
 | [PRODUCT.md](PRODUCT.md) | Who this is for, the voice, the design principles |
 | [ADR-001](docs/ADR-001-cli-transport.md) | Why the CLI is driven through a PTY and never headless |
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |

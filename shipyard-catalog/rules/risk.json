@@ -1,0 +1,133 @@
+[
+  {
+    "id": "payments.webhooks.verified",
+    "version": 1,
+    "category": "payments",
+    "when": { "factsTrue": ["payments"], "minMode": "customer_pilot" },
+    "require": {
+      "gates": [
+        "stripe_webhook_signature_verified",
+        "stripe_idempotency_test_passed",
+        "failed_payment_flow_tested",
+        "payment_events_logged"
+      ],
+      "components": ["stripe_subscription_billing"],
+      "serviceTriggers": ["payment_integration_review"]
+    },
+    "severity": "blocker",
+    "message": "Money is changing hands. If a payment message can be faked, replayed, or silently dropped, you will find out from a customer who was charged twice or not at all."
+  },
+  {
+    "id": "payments.production.human_review",
+    "version": 1,
+    "category": "payments",
+    "when": { "factsTrue": ["payments"], "minMode": "production_product" },
+    "require": { "humanReview": true, "serviceTriggers": ["payment_integration_review"] },
+    "severity": "blocker",
+    "message": "A person needs to read the billing code before real cards are charged at scale. This is the one area where a quiet bug costs money on every single run."
+  },
+  {
+    "id": "privacy.sensitive_data.controls",
+    "version": 1,
+    "category": "privacy",
+    "when": { "factsTrue": ["sensitiveData"], "minMode": "customer_pilot" },
+    "require": {
+      "gates": [
+        "rbac_permission_tests_pass",
+        "audit_log_records_access",
+        "privacy_export_delete_works",
+        "secrets_scan_clean",
+        "data_retention_statement_written"
+      ],
+      "components": ["rbac", "audit_logging", "privacy_export_delete"],
+      "serviceTriggers": ["security_privacy_review"]
+    },
+    "severity": "blocker",
+    "message": "You are holding information people would mind losing. They have to be unable to see each other's, you have to be able to tell who looked at what, and you have to be able to hand someone their data back or delete it when they ask."
+  },
+  {
+    "id": "privacy.consequential_decisions.human_review",
+    "version": 1,
+    "category": "privacy",
+    "when": { "factsTrue": ["aiAffectsConsequentialDecision"] },
+    "require": {
+      "gates": [
+        "human_review_step_present",
+        "decision_consent_recorded",
+        "decision_audit_trail_complete"
+      ],
+      "humanReview": true,
+      "serviceTriggers": ["security_privacy_review", "legal_referral"]
+    },
+    "severity": "blocker",
+    "message": "This software decides something that changes a person's life — whether they get hired, lent to, or admitted. A person has to be able to review those decisions, the people affected have to know it is happening, and you have to be able to reconstruct why any single one was made.",
+    "_note": "Applies at every mode, including ui_concept: a demo that makes real decisions about real people is not a demo."
+  },
+  {
+    "id": "observability.error_monitoring.before_pilot",
+    "version": 1,
+    "category": "observability",
+    "when": { "factsTrue": ["publicFacing"], "minMode": "customer_pilot" },
+    "require": {
+      "gates": ["error_monitoring_receives_test_event", "release_tagged_in_monitoring"],
+      "components": ["sentry_error_monitoring"],
+      "serviceTriggers": ["sentry_setup"]
+    },
+    "severity": "blocker",
+    "message": "Anyone on the internet can reach this. Without error monitoring you will hear about failures from the person they happened to, days later, with no way to reproduce them."
+  },
+  {
+    "id": "security.imported_code.scanned",
+    "version": 1,
+    "category": "security",
+    "when": { "minMode": "functional_prototype" },
+    "require": { "gates": ["dependency_scan_clean", "license_scan_reviewed"] },
+    "severity": "warning",
+    "message": "Some of this code came from other people. It is worth knowing what it is allowed to be used for, and whether any of it has a known hole in it, before it is in front of anyone."
+  },
+  {
+    "id": "deployment.public.https",
+    "version": 1,
+    "category": "deployment",
+    "when": { "factsTrue": ["publicFacing"], "minMode": "customer_pilot" },
+    "require": {
+      "gates": ["domain_ssl_verified"],
+      "serviceTriggers": ["domain_ssl_setup"]
+    },
+    "severity": "blocker",
+    "message": "A public address without a working certificate makes every browser warn people away before they see the product."
+  },
+  {
+    "id": "testing.critical_flows.covered",
+    "version": 1,
+    "category": "testing",
+    "when": { "minMode": "customer_pilot" },
+    "require": {
+      "gates": ["critical_flow_tests_pass", "rbac_permission_tests_pass"],
+      "serviceTriggers": ["manual_qa_pack"]
+    },
+    "severity": "blocker",
+    "message": "The journeys your users actually take need to be checked automatically, every time. Otherwise the next change quietly breaks sign-up and nobody notices until sign-ups stop."
+  },
+  {
+    "id": "escalation.repeated_fix_failure",
+    "version": 1,
+    "category": "escalation",
+    "when": {},
+    "require": {
+      "gates": ["no_repeated_fix_failures"],
+      "serviceTriggers": ["fix_sprint"]
+    },
+    "severity": "warning",
+    "message": "The same problem has come back after two attempts to fix it. That usually means the cause is somewhere other than where it appears, and more attempts will cost more than a person looking at it once."
+  },
+  {
+    "id": "security.protected_components.unmodified",
+    "version": 1,
+    "category": "security",
+    "when": { "minMode": "customer_pilot" },
+    "require": { "gates": ["component_contract_tests_pass"] },
+    "severity": "blocker",
+    "message": "The parts that handle sign-in, permissions and payments are ones we have already checked. If they have been rewritten, they have to be re-checked before launch — that is exactly where a quiet change does the most damage."
+  }
+]

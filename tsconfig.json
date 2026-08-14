@@ -1,8 +1,23 @@
 {
   "files": [],
   "references": [
-    { "path": "packages/shared" },
-    { "path": "packages/cli-bridge" },
-    { "path": "apps/desktop/tsconfig.main.json" }
+    {
+      "path": "packages/shared"
+    },
+    {
+      "path": "packages/cli-bridge"
+    },
+    {
+      "path": "packages/project-state"
+    },
+    {
+      "path": "packages/readiness"
+    },
+    {
+      "path": "packages/rulebook"
+    },
+    {
+      "path": "apps/desktop/tsconfig.main.json"
+    }
   ]
 }

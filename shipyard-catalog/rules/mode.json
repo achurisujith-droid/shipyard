@@ -1,0 +1,64 @@
+[
+  {
+    "id": "mode.ui_concept.label_not_production",
+    "version": 1,
+    "category": "mode",
+    "when": { "modeIn": ["ui_concept"] },
+    "require": { "gates": ["not_production_label_present"] },
+    "severity": "warning",
+    "message": "This is a concept build with made-up data in it. It needs to say so on screen, so nobody who sees a demo thinks they are looking at a working product."
+  },
+  {
+    "id": "mode.functional_prototype.core_flow_works",
+    "version": 1,
+    "category": "mode",
+    "when": { "minMode": "functional_prototype" },
+    "require": {
+      "gates": ["build_passes", "core_flow_smoke_test"],
+      "serviceTriggers": ["fix_sprint"]
+    },
+    "severity": "blocker",
+    "message": "The one thing this build is for is showing that the main journey works. Until it builds and that journey runs end to end, there is nothing to show."
+  },
+  {
+    "id": "mode.customer_pilot.foundations",
+    "version": 1,
+    "category": "mode",
+    "when": { "minMode": "customer_pilot" },
+    "require": {
+      "gates": [
+        "auth_login_works",
+        "database_persists_across_restart",
+        "transactional_email_sends",
+        "critical_flow_tests_pass",
+        "deployed_health_check_passes",
+        "backup_plan_recorded"
+      ],
+      "components": ["auth", "audit_logging"],
+      "serviceTriggers": ["launch_readiness_audit"]
+    },
+    "severity": "blocker",
+    "message": "Real people are about to use this. That means they can sign in, their work is still there tomorrow, the app can email them, and someone finds out before they do when it breaks."
+  },
+  {
+    "id": "mode.production_product.launch_gates",
+    "version": 1,
+    "category": "mode",
+    "when": { "minMode": "production_product" },
+    "require": {
+      "gates": [
+        "security_scan_clean",
+        "dependency_scan_clean",
+        "backup_restore_tested",
+        "uptime_check_configured",
+        "incident_process_recorded",
+        "domain_ssl_verified",
+        "handoff_documentation_written"
+      ],
+      "humanReview": true,
+      "serviceTriggers": ["launch_readiness_audit", "security_privacy_review"]
+    },
+    "severity": "blocker",
+    "message": "Strangers will depend on this and pay for it. Before that, a restore from backup has to have actually been tried, someone has to be told when it goes down, and there has to be a written answer to \"what do we do at 2am\"."
+  }
+]
