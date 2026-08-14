@@ -23,6 +23,9 @@
       "path": "packages/capability-resolver"
     },
     {
+      "path": "packages/component-library"
+    },
+    {
       "path": "packages/project-state"
     },
     {

@@ -1,0 +1,22 @@
+/// Append-only. Nothing in the application updates or deletes these rows —
+/// a log that can be edited is not evidence of anything.
+model AuditEvent {
+  id             String   @id @default(cuid())
+  organizationId String
+  /// Null when the system did it rather than a person.
+  actorUserId    String?
+  /// A stable identifier such as `booking.cancelled`, not a sentence.
+  action         String
+  entityType     String
+  entityId       String?
+  /// Redacted before it is written. Never holds passwords, keys or tokens.
+  details        Json?
+  ip             String?
+  userAgent      String?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@index([organizationId, entityType, entityId])
+  @@index([organizationId, actorUserId])
+  @@map("audit_events")
+}

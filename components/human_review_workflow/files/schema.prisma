@@ -1,0 +1,42 @@
+enum ReviewStatus {
+  PENDING
+  DECIDED
+  APPLIED
+  WITHDRAWN
+}
+
+enum ReviewOutcome {
+  APPROVED
+  REJECTED
+  CHANGED
+}
+
+/// A decision waiting for a person.
+///
+/// Both the suggestion and the decision are kept, separately. Overwriting the
+/// suggestion with the outcome would lose the one thing worth knowing later:
+/// whether the person agreed with the machine or overruled it.
+model ReviewItem {
+  id               String        @id @default(cuid())
+  organizationId   String
+  /// What kind of decision this is, for filtering a queue.
+  kind             String
+  /// Who it is about.
+  subjectRef       String
+  status           ReviewStatus  @default(PENDING)
+  suggestedOutcome ReviewOutcome?
+  suggestedReason  String?
+  /// Whatever the decision was based on.
+  evidence         Json?
+  submittedBy      String?
+  reviewedBy       String?
+  outcome          ReviewOutcome?
+  reviewerReason   String?
+  decidedAt        DateTime?
+  appliedAt        DateTime?
+  createdAt        DateTime      @default(now())
+
+  @@index([organizationId, status, createdAt])
+  @@index([subjectRef])
+  @@map("review_items")
+}

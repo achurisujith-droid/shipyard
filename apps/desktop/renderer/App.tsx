@@ -7,9 +7,10 @@ import { ClaudeCheckScreen } from './screens/ClaudeCheckScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PlanCheckScreen } from './screens/PlanCheckScreen';
 import { IntakeScreen } from './screens/IntakeScreen';
+import { LibraryScreen } from './screens/LibraryScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 
-type Screen = 'welcome' | 'claude-check' | 'plan-check' | 'home' | 'new' | 'chat';
+type Screen = 'welcome' | 'claude-check' | 'plan-check' | 'home' | 'new' | 'chat' | 'library';
 
 export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>('welcome');
@@ -64,7 +65,21 @@ export function App(): JSX.Element {
       // blank "name your app" after losing a session would look like the work
       // was thrown away.
       return session ? (
-        <ChatScreen session={session} prefill={prefill} onExit={() => setScreen('home')} />
+        <ChatScreen
+          session={session}
+          prefill={prefill}
+          onExit={() => setScreen('home')}
+          onOpenLibrary={() => setScreen('library')}
+        />
+      ) : (
+        <HomeScreen onOpened={openSession} onNew={() => setScreen('new')} />
+      );
+
+    case 'library':
+      // Only reachable with a session open, because a component is installed
+      // into a particular project rather than in the abstract.
+      return session ? (
+        <LibraryScreen projectPath={session.cwd} onBack={() => setScreen('chat')} />
       ) : (
         <HomeScreen onOpened={openSession} onNew={() => setScreen('new')} />
       );

@@ -1,0 +1,19 @@
+{
+  "name": "@shipyard/component-library",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Browse, plan and install verified components into a project",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsx harness/test-library.ts"
+  },
+  "dependencies": {
+    "@shipyard/shared": "*"
+  },
+  "devDependencies": {
+    "@shipyard/capability-resolver": "*",
+    "@shipyard/verification-runner": "*"
+  }
+}

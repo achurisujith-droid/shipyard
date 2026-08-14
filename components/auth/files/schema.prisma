@@ -1,0 +1,38 @@
+model User {
+  id                  String    @id @default(cuid())
+  email               String    @unique
+  name                String?
+  /// bcrypt hash. The plain password is never stored, logged or emailed.
+  passwordHash        String
+  emailVerifiedAt     DateTime?
+  /// Set when an account is suspended. Existing sessions stop working at once.
+  disabledAt          DateTime?
+  failedLoginAttempts Int       @default(0)
+  lockedUntil         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  sessions Session[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model Session {
+  id String @id @default(cuid())
+  /// SHA-256 of the cookie value. The value itself is never stored, so a
+  /// leaked backup does not contain usable sessions.
+  tokenHash String    @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  userAgent String?
+  ip        String?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("sessions")
+}

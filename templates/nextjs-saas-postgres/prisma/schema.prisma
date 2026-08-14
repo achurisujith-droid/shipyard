@@ -1,0 +1,23 @@
+// The database, as the code understands it.
+//
+// This file starts almost empty on purpose. Components add their own models to
+// it when they install — the installer appends fragments and refuses when a
+// model name is already taken, so two components cannot quietly disagree about
+// what a `User` is.
+//
+// Anything you add by hand goes at the bottom, under the marker. The installer
+// never writes above it.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// >>> shipyard:components — installed components add their models below this line
+// <<< shipyard:components
+
+// Your own models go here.

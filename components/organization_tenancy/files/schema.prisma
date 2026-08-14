@@ -1,0 +1,33 @@
+enum MemberRole {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  memberships Membership[]
+
+  @@map("organizations")
+}
+
+model Membership {
+  id             String     @id @default(cuid())
+  organizationId String
+  userId         String
+  role           MemberRole @default(MEMBER)
+  createdAt      DateTime   @default(now())
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  /// One row per person per organisation. The unique constraint is what makes
+  /// "add them again" an update rather than a duplicate membership with a
+  /// different role.
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@map("memberships")
+}

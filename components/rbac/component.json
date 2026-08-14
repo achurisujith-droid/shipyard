@@ -1,0 +1,39 @@
+{
+  "id": "rbac",
+  "name": "Who is allowed to do what",
+  "summary": "Roles and permissions, so an ordinary member cannot do the things only an owner should.",
+  "version": "1.0.0",
+  "category": "identity",
+  "trust": "verified",
+  "provenance": {
+    "origin": "adapted",
+    "source": "SimpleHire — its admin permission model, in particular checking the permission rather than the role name at the point of use",
+    "sourceUrl": "https://github.com/achurisujith-droid/shipyard/blob/main/docs/COMPONENT-LIBRARY.md#provenance",
+    "license": "MIT",
+    "changes": "Reduced to a single declarative matrix so the whole permission model can be read on one screen and tested exhaustively.",
+    "adaptedAt": "2026-08-14"
+  },
+  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
+  "provides": ["role_permissions"],
+  "satisfies": ["component_contract_tests_pass", "rbac_permission_tests_pass", "protected_routes_enforced"],
+  "requires": ["organization_tenancy"],
+  "files": [
+    { "from": "files/permissions.ts", "to": "src/components/rbac/permissions.ts", "role": "source" },
+    { "from": "files/require-permission.ts", "to": "src/components/rbac/require-permission.ts", "role": "source" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/rbac.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/rbac.md", "role": "doc" }
+  ],
+  "scripts": { "test:permissions": "vitest run tests/contracts/rbac.test.ts" },
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "extensionPoints": [
+    { "path": "src/app/", "description": "Your own routes and pages. Put a requirePermission() check at the top of anything that needs one." }
+  ],
+  "postInstall": [
+    "Decide which of your actions need a permission, and put a requirePermission() check at the top of each one."
+  ],
+  "limitations": [
+    "Three fixed roles. No custom roles you can define at runtime.",
+    "Permissions apply to the whole organisation. There is no per-record sharing."
+  ],
+  "keywords": ["permissions", "roles", "admin", "owner", "member", "access", "allowed", "rbac", "authorisation"]
+}

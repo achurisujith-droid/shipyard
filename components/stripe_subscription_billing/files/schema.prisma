@@ -1,0 +1,33 @@
+model Subscription {
+  id               String    @id @default(cuid())
+  organizationId   String    @unique
+  stripeCustomerId String    @unique
+  stripeSubscriptionId String? @unique
+  /// active, past_due, cancelled, incomplete
+  state            String    @default("incomplete")
+  priceId          String?
+  currentPeriodEnd DateTime?
+  cancelAt         DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([state])
+  @@map("subscriptions")
+}
+
+/// Every webhook Stripe has sent us, recorded before it is acted on.
+///
+/// The unique index on the event id is what stops a retry being processed
+/// twice. It is a constraint rather than a check in code because under two
+/// workers a check loses the race and the customer is charged twice.
+model WebhookEvent {
+  id          String   @id
+  type        String
+  processedAt DateTime @default(now())
+  /// Set when handling failed, so a genuine problem is visible rather than
+  /// silently retried forever.
+  error       String?
+
+  @@index([type, processedAt])
+  @@map("webhook_events")
+}

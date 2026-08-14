@@ -57,6 +57,17 @@ extraResources:
     to: resources/toolchain
   - from: resources/skills
     to: resources/skills
+  # The component library and the starter template live at the top of the
+  # repository next to shipyard-catalog, because all three are data the product
+  # is built around rather than assets belonging to the desktop app. They are
+  # copied in here rather than duplicated in the source tree.
+  - from: ../../components
+    to: components
+    filter:
+      - '**/*'
+      - '!**/VERIFICATION.json'
+  - from: ../../templates
+    to: templates
 
 # Nothing is fetched at run time, so nothing needs to be fetched at install
 # time either. First launch on a locked-down laptop must not be where the

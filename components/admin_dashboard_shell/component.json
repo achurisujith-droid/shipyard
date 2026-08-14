@@ -1,0 +1,38 @@
+{
+  "id": "admin_dashboard_shell",
+  "name": "A way for you to see what is going on",
+  "summary": "An admin area with a navigation menu that only shows what the person signed in is actually allowed to open.",
+  "version": "1.0.0",
+  "category": "operations",
+  "trust": "verified",
+  "provenance": {
+    "origin": "authored",
+    "license": "MIT",
+    "changes": "Written for the Shipyard starter stack."
+  },
+  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
+  "provides": ["admin_dashboard"],
+  "satisfies": ["component_contract_tests_pass", "protected_routes_enforced"],
+  "requires": ["organization_tenancy", "rbac"],
+  "files": [
+    { "from": "files/navigation.ts", "to": "src/components/admin_dashboard_shell/navigation.ts", "role": "source" },
+    { "from": "files/guard.ts", "to": "src/components/admin_dashboard_shell/guard.ts", "role": "source" },
+    { "from": "files/layout.tsx", "to": "src/app/admin/layout.tsx", "role": "source" },
+    { "from": "files/page.tsx", "to": "src/app/admin/page.tsx", "role": "example" },
+    { "from": "files/admin.css", "to": "src/app/admin/admin.css", "role": "example" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/admin_dashboard_shell.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/admin_dashboard_shell.md", "role": "doc" }
+  ],
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "extensionPoints": [
+    { "path": "src/app/admin/page.tsx", "description": "The admin home page. Put whatever you need to see on it." }
+  ],
+  "postInstall": [
+    "Add your own pages under src/app/admin/ and list them in navigation.ts with the permission each one needs."
+  ],
+  "limitations": [
+    "Hiding a menu item is not security. The page behind it still has to check the permission itself, which is why the guard is a separate function you have to call.",
+    "Plain HTML and CSS. No component framework, no charts, no data tables."
+  ],
+  "keywords": ["admin", "dashboard", "back office", "internal", "management", "console", "overview"]
+}

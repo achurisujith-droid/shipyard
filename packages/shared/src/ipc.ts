@@ -20,6 +20,12 @@ import type {
   ToolSummary,
 } from './claude-types';
 import type { IntakeAnswers, ProjectPlan } from './intake';
+import type {
+  ComponentInstallPlan,
+  ComponentInstallResult,
+  ComponentManifest,
+  LibraryEntry,
+} from './components';
 
 /** Channel names. Kept in one place so main and preload cannot drift. */
 export const IPC_CHANNELS = {
@@ -232,6 +238,34 @@ export interface ShipyardBridge {
     create(plan: ProjectPlan, markdown: string): Promise<void>;
     /** Suggested folder path for a project with this name. */
     suggestPath(name: string): Promise<string>;
+  };
+
+  /**
+   * The component library: browsing verified parts and putting them into a
+   * project. Every install is a two-step — plan, then apply — because the
+   * person approving it cannot read the diff, so the description has to be
+   * complete before anything is written.
+   */
+  library: {
+    /**
+     * The list to show. Ordered by what this project needs rather than
+     * alphabetically, so the first thing on screen is the thing they were told
+     * they need.
+     */
+    list(projectPath?: string, search?: string): Promise<LibraryEntry[]>;
+    detail(id: string): Promise<ComponentManifest | null>;
+    /** Everything installing this would do. Writes nothing. */
+    plan(id: string, projectPath: string): Promise<ComponentInstallPlan>;
+    /** Do it. Refuses rather than overwriting anything the user already has. */
+    install(id: string, projectPath: string): Promise<ComponentInstallResult>;
+    /** Component id → installed version. */
+    installed(projectPath: string): Promise<Record<string, string>>;
+    /**
+     * Files belonging to an installed component that no longer match what was
+     * installed. Detection, not prevention — Shipyard cannot stop the agent
+     * writing to a file, only notice that it did.
+     */
+    tampering(projectPath: string): Promise<{ path: string; componentId: string; status: 'modified' | 'deleted' }[]>;
   };
 
   app: {

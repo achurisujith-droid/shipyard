@@ -1,0 +1,18 @@
+model StoredFile {
+  id             String   @id @default(cuid())
+  organizationId String
+  /// The key in the bucket. Generated, never derived from the filename.
+  key            String   @unique
+  /// What the person called it. For display and download only.
+  displayName    String
+  contentType    String
+  sizeBytes      Int
+  uploadedBy     String?
+  /// Set once the browser confirms the upload finished. A row without this is
+  /// a link that was issued and never used.
+  confirmedAt    DateTime?
+  createdAt      DateTime @default(now())
+
+  @@index([organizationId, createdAt])
+  @@map("stored_files")
+}

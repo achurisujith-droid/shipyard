@@ -5,12 +5,29 @@
     "outDir": "dist",
     "module": "commonjs",
     "moduleResolution": "node",
-    "types": ["node"],
-    "lib": ["ES2023"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2023"
+    ]
   },
-  "include": ["main/**/*", "preload/**/*"],
+  "include": [
+    "main/**/*",
+    "preload/**/*"
+  ],
   "references": [
-    { "path": "../../packages/shared" },
-    { "path": "../../packages/cli-bridge" }
+    {
+      "path": "../../packages/shared"
+    },
+    {
+      "path": "../../packages/cli-bridge"
+    },
+    {
+      "path": "../../packages/component-library"
+    },
+    {
+      "path": "../../packages/verification-runner"
+    }
   ]
 }

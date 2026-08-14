@@ -1,6 +1,7 @@
 import type Database from 'better-sqlite3';
 
 import type {
+  ComponentInstallation,
   Evidence,
   Incident,
   ProjectIntent,
@@ -154,6 +155,27 @@ export class Metadata {
         record     TEXT NOT NULL,
         created_at TEXT NOT NULL
       );
+
+      -- What has been installed into a project, and what that made off limits.
+      --
+      -- The project keeps its own copy in shipyard.components.json, which is
+      -- the one the installer reads. This is Shipyard's copy, and it exists so
+      -- that "how much of this project came from the library rather than being
+      -- generated" can be answered across every project — the number the whole
+      -- product is measured by.
+      CREATE TABLE IF NOT EXISTS installed_components (
+        project_id      TEXT NOT NULL,
+        component_id    TEXT NOT NULL,
+        version         TEXT NOT NULL,
+        installed_at    TEXT NOT NULL,
+        files           TEXT NOT NULL DEFAULT '[]',
+        protected_paths TEXT NOT NULL DEFAULT '[]',
+        contract_run_id TEXT,
+        status          TEXT NOT NULL DEFAULT 'installed',
+        PRIMARY KEY (project_id, component_id)
+      );
+      CREATE INDEX IF NOT EXISTS components_by_project
+        ON installed_components (project_id, installed_at DESC);
 
       CREATE TABLE IF NOT EXISTS telemetry_events (
         id         TEXT PRIMARY KEY,
@@ -450,6 +472,86 @@ export class Metadata {
       .prepare('SELECT score, threshold, ready, recorded_at FROM readiness_scores WHERE project_id = ? ORDER BY id ASC')
       .all(projectId) as { score: number; threshold: number; ready: number; recorded_at: string }[];
     return rows.map((r) => ({ score: r.score, threshold: r.threshold, ready: r.ready === 1, at: r.recorded_at }));
+  }
+
+  // --- installed components -------------------------------------------------
+
+  /**
+   * Record an install, or update it when the same component is installed again
+   * at a new version. Keyed by project and component, so the table holds what
+   * is there now rather than a history of what was tried.
+   */
+  recordComponentInstall(projectId: string, installation: ComponentInstallation): void {
+    this.db
+      .prepare(
+        'INSERT INTO installed_components ' +
+          '(project_id, component_id, version, installed_at, files, protected_paths, contract_run_id, status) ' +
+          'VALUES (?, ?, ?, ?, ?, ?, ?, ?) ' +
+          'ON CONFLICT(project_id, component_id) DO UPDATE SET ' +
+          'version = excluded.version, installed_at = excluded.installed_at, files = excluded.files, ' +
+          'protected_paths = excluded.protected_paths, status = excluded.status',
+      )
+      .run(
+        projectId,
+        installation.componentId,
+        installation.version,
+        installation.installedAt,
+        JSON.stringify(installation.files),
+        JSON.stringify(installation.protectedPaths),
+        installation.contractRunId ?? null,
+        installation.status,
+      );
+  }
+
+  /** What is installed in this project. */
+  installedComponents(projectId: string): ComponentInstallation[] {
+    const rows = this.db
+      .prepare(
+        'SELECT component_id, version, installed_at, files, protected_paths, contract_run_id, status ' +
+          'FROM installed_components WHERE project_id = ? AND status != ? ORDER BY installed_at ASC',
+      )
+      .all(projectId, 'removed') as {
+      component_id: string;
+      version: string;
+      installed_at: string;
+      files: string;
+      protected_paths: string;
+      contract_run_id: string | null;
+      status: string;
+    }[];
+
+    return rows.map((row) => ({
+      componentId: row.component_id,
+      version: row.version,
+      installedAt: row.installed_at,
+      files: JSON.parse(row.files) as string[],
+      protectedPaths: JSON.parse(row.protected_paths) as string[],
+      ...(row.contract_run_id ? { contractRunId: row.contract_run_id } : {}),
+      status: row.status as ComponentInstallation['status'],
+    }));
+  }
+
+  /** Attach the verification run that judged a component's contract. */
+  recordContractRun(projectId: string, componentId: string, runId: string, passed: boolean): void {
+    this.db
+      .prepare('UPDATE installed_components SET contract_run_id = ?, status = ? WHERE project_id = ? AND component_id = ?')
+      .run(runId, passed ? 'installed' : 'contract_failed', projectId, componentId);
+  }
+
+  /**
+   * How many distinct components each project uses.
+   *
+   * The plan's target is that 40% of common functionality comes from the
+   * library rather than being generated. This is the raw material for that
+   * number, and it is worth having even before the denominator is settled.
+   */
+  componentReuse(): { projectId: string; components: number }[] {
+    return this.db
+      .prepare(
+        'SELECT project_id AS projectId, COUNT(*) AS components FROM installed_components ' +
+          "WHERE status != 'removed' GROUP BY project_id ORDER BY components DESC",
+      )
+      .all() as { projectId: string; components: number }[];
   }
 
   // --- incidents, offers, findings, escalations -----------------------------

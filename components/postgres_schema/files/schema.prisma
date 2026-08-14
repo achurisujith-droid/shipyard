@@ -1,0 +1,9 @@
+/// Small pieces of configuration the app needs to remember between restarts.
+/// Deliberately not a place for secrets — those live in the environment.
+model AppSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+
+  @@map("app_settings")
+}

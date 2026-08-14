@@ -1,0 +1,40 @@
+{
+  "id": "audit_logging",
+  "name": "A record of who did what",
+  "summary": "An append-only log of every meaningful action, so you can answer 'who changed this?' months later.",
+  "version": "1.0.0",
+  "category": "compliance",
+  "trust": "verified",
+  "provenance": {
+    "origin": "adapted",
+    "source": "SimpleHire — its admin audit log, including the decision to write the actor, the entity and the change as separate columns rather than a message string",
+    "sourceUrl": "https://github.com/achurisujith-droid/shipyard/blob/main/docs/COMPONENT-LIBRARY.md#provenance",
+    "license": "MIT",
+    "changes": "Added redaction of the recorded values and made the table append-only in the application layer, because an audit log that can be edited is not evidence of anything.",
+    "adaptedAt": "2026-08-14"
+  },
+  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
+  "provides": ["audit_logging"],
+  "satisfies": ["component_contract_tests_pass", "audit_log_records_access"],
+  "requires": ["organization_tenancy", "rbac"],
+  "files": [
+    { "from": "files/audit.ts", "to": "src/components/audit_logging/audit.ts", "role": "source" },
+    { "from": "files/redact.ts", "to": "src/components/audit_logging/redact.ts", "role": "source" },
+    { "from": "files/audit-route.ts", "to": "src/app/api/audit/route.ts", "role": "source" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/audit_logging.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/audit_logging.md", "role": "doc" }
+  ],
+  "schema": { "file": "files/schema.prisma", "models": ["AuditEvent"] },
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "extensionPoints": [
+    { "path": "src/components/audit_logging/actions.ts", "description": "Name your own auditable actions here." }
+  ],
+  "postInstall": [
+    "Call audit() from anything that changes data someone might later ask about."
+  ],
+  "limitations": [
+    "Append-only is enforced by this component, not by the database. Someone with direct database access can still delete rows.",
+    "It records what your code tells it. An action that never calls audit() leaves no trace."
+  ],
+  "keywords": ["audit", "log", "history", "who did what", "trail", "compliance", "gdpr", "accountability"]
+}

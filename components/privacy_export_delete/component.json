@@ -1,0 +1,52 @@
+{
+  "id": "privacy_export_delete",
+  "name": "Handing someone their data back, or deleting it",
+  "summary": "When a person asks for a copy of their data or asks you to erase it, you can do both — and prove you did.",
+  "version": "1.0.0",
+  "category": "compliance",
+  "trust": "verified",
+  "provenance": {
+    "origin": "adapted",
+    "source": "SimpleHire — its GDPR export and deletion services, including the hard lesson that tables not reachable by a database cascade have to be listed by hand or they survive the deletion",
+    "sourceUrl": "https://github.com/achurisujith-droid/shipyard/blob/main/docs/COMPONENT-LIBRARY.md#provenance",
+    "license": "MIT",
+    "changes": "Generalised away from its domain tables into a registry the project fills in, so that adding a table forces a decision about what happens to it on erasure.",
+    "adaptedAt": "2026-08-14"
+  },
+  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
+  "provides": ["privacy_export_delete"],
+  "satisfies": ["component_contract_tests_pass", "privacy_export_delete_works"],
+  "requires": ["organization_tenancy", "rbac", "audit_logging"],
+  "files": [
+    { "from": "files/export.ts", "to": "src/components/privacy_export_delete/export.ts", "role": "source" },
+    { "from": "files/erase.ts", "to": "src/components/privacy_export_delete/erase.ts", "role": "source" },
+    { "from": "files/registry.ts", "to": "src/components/privacy_export_delete/registry.ts", "role": "example" },
+    { "from": "files/request-route.ts", "to": "src/app/api/privacy/request/route.ts", "role": "source" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/privacy_export_delete.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/privacy_export_delete.md", "role": "doc" }
+  ],
+  "schema": { "file": "files/schema.prisma", "models": ["PrivacyRequest"], "enums": ["PrivacyRequestKind", "PrivacyRequestStatus"] },
+  "env": [
+    {
+      "name": "DATA_RETENTION_DAYS",
+      "description": "How long you keep records before deleting them automatically.",
+      "required": false,
+      "secret": false,
+      "devDefault": "365"
+    }
+  ],
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "extensionPoints": [
+    { "path": "src/components/privacy_export_delete/registry.ts", "description": "List every table holding personal data and say what happens to it on erasure." }
+  ],
+  "postInstall": [
+    "Fill in the registry with every table that holds personal data. A table left out is one that survives an erasure request.",
+    "Write down how long you keep data and why. Shipyard asks for this before you go live."
+  ],
+  "limitations": [
+    "It deletes from your database. Copies in backups, in your email provider, in your analytics or in a spreadsheet on somebody's laptop are not touched.",
+    "The registry is filled in by you. Nothing can detect a table you forgot to list.",
+    "Whether your handling satisfies the law where you operate is a question for a lawyer, not this component."
+  ],
+  "keywords": ["gdpr", "privacy", "export", "delete", "erasure", "data request", "right to be forgotten", "subject access", "retention"]
+}

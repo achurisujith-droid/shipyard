@@ -27,6 +27,7 @@ interface Props {
   /** Pre-filled but NOT sent, per the Milestone 3 spec. */
   prefill?: string;
   onExit: () => void;
+  onOpenLibrary: () => void;
 }
 
 type Entry =
@@ -41,7 +42,7 @@ const SUGGESTIONS = [
   'Make a simple page that says hello, so I can see it working.',
 ];
 
-export function ChatScreen({ session, prefill, onExit }: Props): JSX.Element {
+export function ChatScreen({ session, prefill, onExit, onOpenLibrary }: Props): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
   /** The reply being written. Replaced wholesale on each update, never appended. */
   const [partial, setPartial] = useState('');
@@ -178,6 +179,12 @@ export function ChatScreen({ session, prefill, onExit }: Props): JSX.Element {
             </span>
           </div>
           <StatusChip state={state} />
+          {/* Reachable from here rather than only from the home screen: the
+              moment somebody wants a sign-in page is while they are asking for
+              one, not before they started. */}
+          <button className="btn btn-quiet btn-sm" onClick={onOpenLibrary}>
+            Ready-made parts
+          </button>
           <button
             className="btn btn-quiet btn-sm"
             onClick={() => setShowPreview((v) => !v)}

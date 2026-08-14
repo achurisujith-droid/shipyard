@@ -41,6 +41,8 @@ macOS and Linux are not built yet.
 | Electron shell and first-run flow | Passing on Windows ([MILESTONE-2](docs/MILESTONE-2.md)) |
 | Intake wizard → `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
 | Run, preview, fix loop | Built ([RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md)) |
+| Decision layer: rules, readiness, capabilities, verification, incidents | Built, 190 cases across 6 packages |
+| Component library: 13 components, browse and install | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — 127 engine cases, plus 229 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
 | Guided install and sign-in | Written, never executed — needs a clean VM |
 | macOS, Linux | Not started |
@@ -75,8 +77,11 @@ packages/
   security/       redaction, quarantine, licence scanning
   incident-engine/      failures -> fix tasks -> developer packets
   service-recommendations/  paid help, only when something justifies it
+  component-library/    browse, plan and install verified components
 apps/
   desktop/        the Electron app
+components/       the verified components themselves, one folder each
+templates/        the starter project components install into
 shipyard-catalog/ rules, capabilities, vendors and services as data
 site/             the public landing page, deployed to GitHub Pages
 docs/
@@ -89,6 +94,7 @@ docs/
 | [V1-POC-PLAN](docs/V1-POC-PLAN.md) | What is being built, in what order, and what is deliberately held |
 | [PRODUCT.md](PRODUCT.md) | Who this is for, the voice, the design principles |
 | [ADR-001](docs/ADR-001-cli-transport.md) | Why the CLI is driven through a PTY and never headless |
+| [COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md) | What makes something a component, what trust levels mean, where the code came from |
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
 | [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
 | [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |

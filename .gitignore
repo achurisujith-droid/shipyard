@@ -19,3 +19,8 @@ apps/desktop/resources/toolchain/
 Thumbs.db
 *.tmp
 *.log
+
+# Written by packages/component-library/scripts/verify-components.ts. A record
+# of one run on one machine — it goes stale silently, and a stale verification
+# record is a false claim. The dated result lives in docs/COMPONENT-LIBRARY.md.
+components/VERIFICATION.json

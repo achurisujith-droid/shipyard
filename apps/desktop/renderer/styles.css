@@ -1754,3 +1754,265 @@ p {
     border-top-color: var(--primary-soft);
   }
 }
+
+/* ── The component library ────────────────────────────────────────────────
+ *
+ * Two-pane: what is available on the left, what taking it would do on the
+ * right. The right pane is the important half — it is where a person who
+ * cannot read a diff finds out what they are agreeing to.
+ */
+
+.library {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  height: 100%;
+  padding: var(--space-6);
+  max-width: 68rem;
+  margin: 0 auto;
+  min-height: 0;
+}
+
+.library-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.library-header h1 {
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-2);
+}
+
+.library-header p {
+  color: var(--muted);
+  margin: 0;
+  max-width: 44ch;
+}
+
+.library-search {
+  width: 100%;
+  padding: var(--space-3) var(--space-4);
+  font: inherit;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.library-search:focus-visible {
+  outline: 2px solid var(--primary-ring);
+  outline-offset: 1px;
+  border-color: var(--border-interactive);
+}
+
+.library-body {
+  display: grid;
+  grid-template-columns: minmax(18rem, 24rem) 1fr;
+  gap: var(--space-5);
+  min-height: 0;
+  flex: 1;
+}
+
+@media (max-width: 56rem) {
+  .library-body {
+    grid-template-columns: 1fr;
+  }
+}
+
+.library-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-height: 0;
+}
+
+.library-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+}
+
+.library-item:hover {
+  border-color: var(--border-interactive);
+}
+
+.library-item.is-selected {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.library-item-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.library-summary {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+/* The reason the capability resolver gave, carried through to here. It is the
+ * link between "you said you have customers" and "so you need this". */
+.library-reason {
+  font-size: var(--text-sm);
+  color: var(--primary);
+}
+
+.badge {
+  font-size: var(--text-xs);
+  padding: 0.1rem var(--space-2);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.badge-installed {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.badge-needed {
+  background: var(--primary-soft);
+  color: var(--primary);
+}
+
+.badge-provisional {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.library-detail {
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: var(--space-2);
+}
+
+.library-detail h2 {
+  font-size: var(--text-xl);
+  margin: 0 0 var(--space-2);
+}
+
+.library-detail h3 {
+  font-size: var(--text-base);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.library-detail h4 {
+  font-size: var(--text-sm);
+  margin: var(--space-4) 0 var(--space-2);
+}
+
+.library-detail-summary {
+  color: var(--muted);
+  margin: 0;
+}
+
+.library-facts {
+  margin: var(--space-5) 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.library-facts dt {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.library-facts dd {
+  margin: var(--space-1) 0 0;
+}
+
+.library-limits ul,
+.library-change ul,
+.library-needs ul,
+.library-refusal ul {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.library-limits {
+  color: var(--muted);
+}
+
+.library-change {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+}
+
+.library-change h3 {
+  margin-top: 0;
+}
+
+.library-needs em {
+  color: var(--muted);
+  font-style: normal;
+}
+
+/* A refusal is not an error state to be hurried past — it is the answer, and
+ * it has to be as readable as a success. */
+.library-refusal {
+  background: var(--warn-soft);
+  border-left: 3px solid var(--warn);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.library-refusal h3 {
+  margin-top: 0;
+}
+
+.library-done {
+  background: var(--success-soft);
+  border-left: 3px solid var(--success);
+  border-radius: var(--radius-sm);
+  padding: var(--space-4);
+}
+
+.library-done h3 {
+  margin-top: 0;
+}
+
+.library-done ol {
+  margin: 0;
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.library-note,
+.library-hint,
+.library-loading {
+  color: var(--muted);
+}
+
+.library-error {
+  color: var(--danger);
+}
+
+.library-detail > .btn-primary {
+  margin-top: var(--space-5);
+}

@@ -1,0 +1,28 @@
+enum JobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+}
+
+model Job {
+  id      String    @id @default(cuid())
+  kind    String
+  payload Json      @default("{}")
+  status  JobStatus @default(PENDING)
+  /// Not before this time. Retries push it into the future.
+  runAt   DateTime  @default(now()) @map("run_at")
+  attempts Int      @default(0)
+  /// Set while a worker holds it, so an abandoned job can be spotted.
+  claimedAt DateTime? @map("claimed_at")
+  claimedBy String?   @map("claimed_by")
+  /// Enqueueing the same key twice adds one job, not two.
+  dedupeKey String?   @map("dedupe_key")
+  lastError String?   @map("last_error")
+  finishedAt DateTime? @map("finished_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([status, runAt])
+  @@index([dedupeKey])
+  @@map("jobs")
+}

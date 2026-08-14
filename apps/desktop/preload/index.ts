@@ -61,6 +61,14 @@ const api: ShipyardApi = {
       call('runner.reportBrowserProblem', message, detail, location),
     clearProblems: () => call('runner.clearProblems'),
   },
+  library: {
+    list: (projectPath, search) => call('library.list', projectPath, search),
+    detail: (id) => call('library.detail', id),
+    plan: (id, projectPath) => call('library.plan', id, projectPath),
+    install: (id, projectPath) => call('library.install', id, projectPath),
+    installed: (projectPath) => call('library.installed', projectPath),
+    tampering: (projectPath) => call('library.tampering', projectPath),
+  },
   intake: {
     plan: (answers, projectPath) => call('intake.plan', answers, projectPath),
     create: (plan, markdown) => call('intake.create', plan, markdown),

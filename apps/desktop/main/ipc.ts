@@ -18,6 +18,7 @@ import {
 
 import type { CLIManager } from './cli-manager';
 import type { Intake } from './intake';
+import type { Library } from './library';
 import type { ProjectRunner } from './project-runner';
 import type { Store } from './store';
 import type { Toolchain } from './toolchain';
@@ -39,6 +40,7 @@ export function registerIpc(
   runner: ProjectRunner,
   toolchain: Toolchain,
   intake: Intake,
+  library: Library,
 ): void {
   const handlers: Record<string, Handler> = {
     'claude.detect': () => manager.detect(false),
@@ -144,6 +146,22 @@ export function registerIpc(
     'runner.clearProblems': () => {
       runner.clearProblems();
     },
+
+    // The component library. Every route that names a component validates the
+    // id, because it becomes a directory name on the way to reading a manifest.
+    'library.list': (a) => {
+      const projectPath = typeof a[0] === 'string' && a[0] ? safeProjectPath(a[0]) : undefined;
+      const search = typeof a[1] === 'string' ? a[1].slice(0, 120) : undefined;
+      return library.list(projectPath, search ? { search } : {});
+    },
+    'library.detail': (a) => library.detail(safeComponentId(a[0])),
+    'library.plan': (a) => library.plan(safeComponentId(a[0]), safeProjectPath(str(a, 1))),
+    'library.install': (a) => {
+      const projectPath = safeProjectPath(str(a, 1));
+      return library.install(safeComponentId(a[0]), projectPath, store.findProjectByPath(projectPath)?.id);
+    },
+    'library.installed': (a) => library.installed(safeProjectPath(str(a, 0))),
+    'library.tampering': (a) => library.tampering(safeProjectPath(str(a, 0))),
 
     'intake.plan': (a) => intake.plan(asAnswers(a[0]), safeProjectPath(str(a, 1))),
     'intake.create': async (a) => {
@@ -318,6 +336,21 @@ function safeScriptName(input: unknown): string | undefined {
   if (typeof input !== 'string' || input.length === 0) return undefined;
   if (input.length > 64 || !/^[\w.:-]+$/.test(input)) {
     throw new Error('Script name contains characters that are not allowed');
+  }
+  return input;
+}
+
+/**
+ * A component id, or a refusal.
+ *
+ * This becomes a directory name on the way to reading a manifest off disk, so
+ * the shape is checked rather than assumed. The loader also refuses anything
+ * whose folder and id disagree, but a boundary check costs nothing and means
+ * the guarantee does not depend on reading the loader.
+ */
+function safeComponentId(input: unknown): string {
+  if (typeof input !== 'string' || !/^[a-z][a-z0-9_]{0,63}$/.test(input)) {
+    throw new Error('That is not a component id');
   }
   return input;
 }

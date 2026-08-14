@@ -3,10 +3,12 @@ import path from 'node:path';
 import { BrowserWindow, app, shell } from 'electron';
 
 import { IPC_CHANNELS, type ShipyardEventName, type ShipyardEvents } from '@shipyard/shared';
+import { GATES } from '@shipyard/verification-runner';
 
 import { CLIManager } from './cli-manager';
 import { Intake } from './intake';
 import { registerIpc } from './ipc';
+import { Library, componentsRoot } from './library';
 import { PostgresManager } from './postgres';
 import { ProjectRunner } from './project-runner';
 import { Store } from './store';
@@ -65,7 +67,14 @@ function bootstrap(): void {
       'skills',
     ),
   );
-  registerIpc(manager, store, runner, toolchain, intake);
+  const library = new Library({
+    root: componentsRoot(app.isPackaged, __dirname),
+    // A manifest cannot claim a check that nothing runs, or a capability the
+    // catalog has never heard of. Enforced at load rather than trusted.
+    knownGates: GATES.map((gate) => gate.id),
+    metadata: store.metadata,
+  });
+  registerIpc(manager, store, runner, toolchain, intake, library);
   createWindow();
 
   app.on('activate', () => {

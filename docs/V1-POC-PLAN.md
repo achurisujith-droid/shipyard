@@ -65,6 +65,9 @@ The decision layer — the part that makes "ready" a fact rather than an opinion
 | [`@shipyard/readiness`](../packages/readiness/) | 10 weighted categories summing to 100, per-mode thresholds, blockers vs warnings, next actions, service triggers. |
 | [`@shipyard/project-state`](../packages/project-state/) | 15 states, evidence-backed transitions, sign-off on the two that expose real users. |
 | [`@shipyard/capability-resolver`](../packages/capability-resolver/) | Turns intent into capabilities, each with the components, vendor, recipes and gates behind it — and a reason in the founder's words. |
+| [`@shipyard/component-library`](../packages/component-library/) | Loads the library, refuses a broken one, plans an install before writing anything, applies it or rolls it back completely. |
+| [`components/`](../components/) | 13 verified components with manifests, provenance, contract tests and protected paths. See [COMPONENT-LIBRARY](COMPONENT-LIBRARY.md). |
+| [`templates/nextjs-saas-postgres/`](../templates/nextjs-saas-postgres/) | The starter project components install into. |
 | [`shipyard-catalog/`](../shipyard-catalog/) | 14 rules, 18 capabilities, 10 vendors and 10 service offers, all as data outside application code. |
 
 Covered by `npm test -w @shipyard/rulebook` (33 cases) and
@@ -118,7 +121,7 @@ evidence the next one consumes:
 | P6 | Vendor catalog | Done as data; admin edit UI not built |
 | P7 | Integration recipe runner | Not started |
 | P8 | Verified skills registry | 5 skills exist without manifests, versions or a registry |
-| P9 | Component library foundation | Not started — the largest single piece |
+| P9 | Component library foundation | **Done** — 13 components, manifest format, browse/plan/install engine, protected paths, browse UI. 229 contract tests pass against a real install |
 | P10 | Capability resolver | Done |
 | P11 | Agent task composer | Not started |
 | P12 | Verification runner | Done — 44 gates, run in the project, evidence out |
@@ -133,25 +136,41 @@ evidence the next one consumes:
 
 ### What is left, and why it is left
 
-Everything remaining needs something this session could not produce: a real
-starter application, a real vendor account, or a person looking at a screen.
-
-- **P9 component library** and **P3's `ARCHITECTURE.md`** need the
-  Next.js/Prisma/Postgres starter template to exist first. Twelve components
-  installing into nothing is twelve manifests.
 - **P7 recipes** and **P14 Sentry** need real accounts and real credentials to
   be worth anything. A recipe that has never installed against the live service
-  is documentation with a version number.
+  is documentation with a version number. The Stripe, S3 and Sentry components
+  exist and are marked `provisional` for exactly this reason: their logic is
+  tested, the money has never moved, and no event has ever reached a Sentry
+  project.
 - **P11 task composer** is half-built: `composeFixTask` does it for incidents.
   Doing it for plans and failed gates is the same shape.
 - **P8 skills registry** — the five skills exist and are copied into projects.
-  Manifests, versions and trust levels are a small, self-contained piece.
-- **P19 admin console** and every **UI** in P13/P16/P20. The engines return
-  exactly what those screens need; nothing has been drawn.
+  Manifests, versions and trust levels are a small, self-contained piece, and
+  the component manifest format is the obvious model for it.
+- **P19 admin console** and the remaining **UI** in P13/P16/P20. The engines
+  return exactly what those screens need; only the library browser has been
+  drawn.
+- **P3's `ARCHITECTURE.md`** is now unblocked — the starter template exists and
+  the component library is what an architecture document would describe.
 
-The order from here is: starter template → P9 → P7/P14 → the UI. The engine
-layer is done and tested; what remains is mostly wiring it to a screen and to
-somebody's Sentry account.
+The order from here is: P3 → P8 → P11 → the remaining UI, with P7/P14 waiting on
+credentials somebody has to supply.
+
+### What the library work changed about the plan
+
+Two of the plan's own numbers can now be measured rather than estimated.
+
+**"The library covers at least half the foundation."** `coverage()` computes it
+from the capability plan and the installed library, and it is the number the
+browse screen sorts by. Thirteen components cover thirteen of the eighteen
+catalog capabilities.
+
+**"8 verified components exist and 5 install with tests."** Ten are verified and
+all thirteen install with tests — but *verified* here means something narrower
+than the plan implies, and the narrowing is deliberate. It means the contract
+tests ran against a real install and passed. It does not mean anyone has taken a
+payment, uploaded a file or received a Sentry event, which is why three
+components say `provisional` instead.
 
 ## Deliberate holds
 

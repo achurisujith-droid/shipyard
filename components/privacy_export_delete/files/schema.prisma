@@ -1,0 +1,35 @@
+enum PrivacyRequestKind {
+  EXPORT
+  ERASURE
+}
+
+enum PrivacyRequestStatus {
+  RECEIVED
+  IN_PROGRESS
+  COMPLETED
+  REFUSED
+}
+
+/// A request from a person about their own data.
+///
+/// Kept whatever the outcome, including refusals. "We received it and refused
+/// it, for this reason, on this date" is the answer to a complaint; "we have no
+/// record of that" is not.
+model PrivacyRequest {
+  id             String               @id @default(cuid())
+  organizationId String
+  kind           PrivacyRequestKind
+  status         PrivacyRequestStatus @default(RECEIVED)
+  /// Who the request is about.
+  subjectUserId  String
+  /// Who handled it.
+  handledBy      String?
+  /// What was actually done, in words.
+  outcome        String?
+  receivedAt     DateTime             @default(now())
+  completedAt    DateTime?
+
+  @@index([organizationId, status])
+  @@index([subjectUserId])
+  @@map("privacy_requests")
+}
