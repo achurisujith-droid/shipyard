@@ -64,6 +64,12 @@ export interface LibraryOptions {
   knownGates?: readonly string[];
   knownCapabilities?: readonly string[];
   metadata?: Metadata;
+  /**
+   * Called after anything that changes what the project is made of, so the
+   * documents describing it can be rewritten. A failure here is logged and
+   * swallowed by the caller — stale documentation must not fail an install.
+   */
+  onChanged?: (projectPath: string, projectId?: string) => Promise<void>;
 }
 
 export class Library {
@@ -116,6 +122,7 @@ export class Library {
     if (!result.installed) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
 
     if (projectId && this.options.metadata) {
       const record = await readInstallRecord(projectPath);
@@ -144,6 +151,7 @@ export class Library {
     if (!result.removed) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
     if (projectId && this.options.metadata) {
       this.options.metadata.markComponentRemoved(projectId, id);
     }
@@ -159,6 +167,7 @@ export class Library {
     if (!result.upgraded) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
     if (projectId && this.options.metadata) {
       const record = await readInstallRecord(projectPath);
       const installation = record.components.find((entry) => entry.componentId === id);

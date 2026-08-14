@@ -1,6 +1,10 @@
 ---
 name: The stack
 description: React, Node and PostgreSQL — what to use, and what will not run here
+version: 1.0.0
+trust: verified
+asserts: node=24, postgres=18
+reviewedAt: 2026-08-14
 ---
 
 # The stack

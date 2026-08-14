@@ -1,6 +1,9 @@
 ---
 name: Talking to a non-programmer
 description: How to explain what you are doing to the person who owns this project
+version: 1.0.0
+trust: verified
+reviewedAt: 2026-08-14
 ---
 
 # Talking to a non-programmer

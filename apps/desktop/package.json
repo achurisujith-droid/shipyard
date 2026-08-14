@@ -29,9 +29,15 @@
     "test:metadata": "tsx scripts/test-metadata.mts"
   },
   "dependencies": {
+    "@shipyard/capability-resolver": "*",
     "@shipyard/cli-bridge": "*",
     "@shipyard/component-library": "*",
+    "@shipyard/project-contracts": "*",
+    "@shipyard/readiness": "*",
+    "@shipyard/rulebook": "*",
     "@shipyard/shared": "*",
+    "@shipyard/skills-registry": "*",
+    "@shipyard/task-composer": "*",
     "@shipyard/verification-runner": "*",
     "better-sqlite3": "^13.0.2",
     "react": "^18.3.1",

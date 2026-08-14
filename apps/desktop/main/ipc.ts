@@ -11,6 +11,7 @@ import {
   type IntakeAnswers,
   type InvokeMessage,
   type ProjectPlan,
+  intentFromAnswers,
   type ProjectRecord,
   type TargetMode,
   TARGET_MODE_ORDER,
@@ -18,6 +19,7 @@ import {
 
 import type { CLIManager } from './cli-manager';
 import type { Intake } from './intake';
+import type { Contracts } from './contracts';
 import type { Library } from './library';
 import type { ProjectRunner } from './project-runner';
 import type { Store } from './store';
@@ -41,6 +43,7 @@ export function registerIpc(
   toolchain: Toolchain,
   intake: Intake,
   library: Library,
+  contracts: Contracts,
 ): void {
   const handlers: Record<string, Handler> = {
     'claude.detect': () => manager.detect(false),
@@ -181,7 +184,27 @@ export function registerIpc(
       }
       // The path is re-validated here rather than trusted from the plan object:
       // the renderer round-tripped it, so it is untrusted input again.
-      await intake.create({ ...plan, path: safeProjectPath(plan.path) }, str(a, 1));
+      const projectPath = safeProjectPath(plan.path);
+      await intake.create({ ...plan, path: projectPath }, str(a, 1));
+
+      // Record what the wizard learned, then write the documents that describe
+      // it. Without the first, everything downstream — rules, readiness, the
+      // architecture document — has no intent to reason about and quietly
+      // produces nothing.
+      const project = store.findProjectByPath(projectPath);
+      if (project) {
+        const intent = intentFromAnswers(plan.answers);
+        store.metadata.saveIntent(project.id, intent);
+        store.metadata.saveContract(project.id, { projectMd: str(a, 1) });
+        await contracts.refresh({
+          projectId: project.id,
+          projectPath,
+          name: project.name,
+          idea: plan.answers.idea,
+          intent,
+          phases: plan.phases,
+        });
+      }
     },
     'intake.suggestPath': (a) => path.join(defaultProjectRoot(store), folderName(str(a, 0))),
 

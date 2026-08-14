@@ -68,6 +68,11 @@ extraResources:
       - '!**/VERIFICATION.json'
   - from: ../../templates
     to: templates
+  # Read at run time to resolve capabilities, evaluate rules and score
+  # readiness. Without it a packaged build silently produces no architecture
+  # document and no readiness score.
+  - from: ../../shipyard-catalog
+    to: shipyard-catalog
 
 # Nothing is fetched at run time, so nothing needs to be fetched at install
 # time either. First launch on a locked-down laptop must not be where the

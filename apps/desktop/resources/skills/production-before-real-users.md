@@ -1,6 +1,10 @@
 ---
 name: Before real users
 description: What must be true before a stranger can sign up, and what the owner is legally on the hook for
+version: 1.0.0
+trust: verified
+appliesFrom: customer_pilot
+reviewedAt: 2026-08-14
 ---
 
 # Before real users

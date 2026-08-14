@@ -115,15 +115,15 @@ evidence the next one consumes:
 | P0 | Repository and architecture baseline | Done |
 | P1 | Project metadata store | Done — intent, lifecycle, contract, capabilities, append-only evidence, runs, rule evaluations, readiness history, incidents, offers, findings, telemetry |
 | P2 | Project intent onboarding wizard | Four modes done. The remaining intent fields (regions, data sensitivity, payments, decisions, launch date) are not yet asked. |
-| P3 | Planning engine | `PROJECT.md` done. `ARCHITECTURE.md` and the four `shipyard.*.json` contracts are not. |
+| P3 | Planning engine | **Done** — `PROJECT.md`, `ARCHITECTURE.md` and the four `shipyard.*.json` contracts, all regenerated after anything that changes the answer |
 | P4 | Rulebook engine | Done |
 | P5 | Project state machine | Done (transition UI not built) |
 | P6 | Vendor catalog | Done as data; admin edit UI not built |
 | P7 | Integration recipe runner | Not started |
-| P8 | Verified skills registry | 5 skills exist without manifests, versions or a registry |
+| P8 | Verified skills registry | **Done** — manifests, versions, trust levels, declared applicability, and a check that their factual claims match what the app ships |
 | P9 | Component library foundation | **Done** — 13 components, manifest format, browse/plan/install engine, protected paths, browse UI. 229 contract tests pass against a real install |
 | P10 | Capability resolver | Done |
-| P11 | Agent task composer | Not started |
+| P11 | Agent task composer | **Done** — phases, failing checks and capability gaps, plus the ordering between them |
 | P12 | Verification runner | Done — 44 gates, run in the project, evidence out |
 | P13 | Readiness dashboard | Calculator and history done; no UI |
 | P14 | Sentry and observability pipeline | Not started |

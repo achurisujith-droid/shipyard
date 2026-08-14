@@ -1,6 +1,10 @@
 ---
 name: What you may fake in a prototype
 description: The shortcuts this project has explicitly agreed to, and the ones it has not
+version: 1.0.0
+trust: verified
+appliesUntil: functional_prototype
+reviewedAt: 2026-08-14
 ---
 
 # What you may fake in a prototype

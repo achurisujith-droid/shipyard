@@ -11,7 +11,7 @@
  * changes nothing is a question that should not be asked.
  */
 
-import { modeAtLeast, type TargetMode } from './production';
+import { modeAtLeast, type ProjectIntent, type TargetMode } from './production';
 
 export type { TargetMode };
 
@@ -111,9 +111,40 @@ export interface ProjectPlan {
   firstMessage: string;
 }
 
+/**
+ * The wizard's three answers, as the intent everything downstream speaks.
+ *
+ * The wizard does not yet ask about regions, sensitive data, payments or
+ * automated decisions — that is the outstanding half of P2. Until it does, the
+ * unknowns default the **cautious** way: assume there is personal data, assume
+ * it is public facing. Getting that backwards would let a project skip
+ * obligations it actually has, and the mistake would only surface once real
+ * people were involved.
+ *
+ * The opposite error — a concept build being told it needs an audit log — is
+ * visible immediately and costs a conversation.
+ */
+export function intentFromAnswers(answers: IntakeAnswers): ProjectIntent {
+  const real = isForRealUsers(answers.ambition);
+  return {
+    targetMode: answers.ambition,
+    regions: [],
+    // Assumed until asked. A project that turns out to hold nothing sensitive
+    // loses nothing by having been careful.
+    sensitiveData: real,
+    payments: false,
+    aiAffectsConsequentialDecision: false,
+    humanReviewRequired: false,
+    publicFacing: real,
+    existingCodeSource: 'new_project',
+  };
+}
+
 export interface SkillSummary {
   id: string;
   title: string;
+  /** Recorded so a project can be told its skills have moved on. */
+  version?: string;
   /** One line, so the review screen can say what each one is for. */
   description: string;
 }

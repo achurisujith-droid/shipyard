@@ -42,6 +42,8 @@ macOS and Linux are not built yet.
 | Intake wizard → `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
 | Run, preview, fix loop | Built ([RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md)) |
 | Decision layer: rules, readiness, capabilities, verification, incidents | Built, 190 cases across 6 packages |
+| Planning: `PROJECT.md`, `ARCHITECTURE.md`, four `shipyard.*.json` contracts | Built, regenerated whenever the project changes |
+| Skills registry, agent task composer | Built, 84 cases |
 | Component library: 13 components | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 160 engine cases plus 229 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
 | Guided install and sign-in | Written, never executed — needs a clean VM |
@@ -78,6 +80,9 @@ packages/
   incident-engine/      failures -> fix tasks -> developer packets
   service-recommendations/  paid help, only when something justifies it
   component-library/    browse, plan and install verified components
+  skills-registry/      what the agent is told, versioned and claim-checked
+  task-composer/        plans, gaps and failing checks -> work the agent can do
+  project-contracts/    ARCHITECTURE.md and the shipyard.*.json files
 apps/
   desktop/        the Electron app
 components/       the verified components themselves, one folder each

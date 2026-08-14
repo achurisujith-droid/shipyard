@@ -8,6 +8,7 @@ import { GATES } from '@shipyard/verification-runner';
 import { CLIManager } from './cli-manager';
 import { Intake } from './intake';
 import { registerIpc } from './ipc';
+import { Contracts } from './contracts';
 import { Library, componentsRoot } from './library';
 import { PostgresManager } from './postgres';
 import { ProjectRunner } from './project-runner';
@@ -67,14 +68,35 @@ function bootstrap(): void {
       'skills',
     ),
   );
+  const catalogRoot = path.join(
+    app.isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..', '..', '..'),
+    'shipyard-catalog',
+  );
+  const metadata = store.metadata;
+  const projects = store;
+  const contracts = new Contracts(catalogRoot, metadata);
   const library = new Library({
     root: componentsRoot(app.isPackaged, __dirname),
+    // Installing something changes what the project is made of, so the
+    // documents that describe it are rewritten rather than left to drift.
+    onChanged: async (projectPath, projectId) => {
+      const project = projects.findProjectByPath(projectPath);
+      const intent = projectId ? metadata.intent(projectId) : undefined;
+      if (!project || !intent) return;
+      await contracts.refresh({
+        projectId: project.id,
+        projectPath,
+        name: project.name,
+        idea: metadata.contract(project.id)?.projectMd?.slice(0, 200) ?? project.name,
+        intent,
+      });
+    },
     // A manifest cannot claim a check that nothing runs, or a capability the
     // catalog has never heard of. Enforced at load rather than trusted.
     knownGates: GATES.map((gate) => gate.id),
     metadata: store.metadata,
   });
-  registerIpc(manager, store, runner, toolchain, intake, library);
+  registerIpc(manager, store, runner, toolchain, intake, library, contracts);
   createWindow();
 
   app.on('activate', () => {

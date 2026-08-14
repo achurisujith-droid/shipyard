@@ -10,6 +10,7 @@ import {
   type ProjectPlan,
   type SkillSummary,
 } from '@shipyard/shared';
+import { loadSkills, skillsFor, type SkillManifest } from '@shipyard/skills-registry';
 
 /**
  * Turning three answers into a plan.
@@ -74,43 +75,34 @@ export class Intake {
     }
   }
 
-  /** Every skill in the library that applies to these answers. */
+  /**
+   * Every skill in the library that applies to these answers.
+   *
+   * Which ones apply is read from each skill's own manifest rather than from
+   * its filename. The old rule keyed off a `prototype-` or `production-`
+   * prefix, which worked right up until somebody named a file badly — and
+   * nothing would have said so.
+   *
+   * A skills directory that cannot be read is empty rather than fatal. A
+   * broken *skill* is a different matter and is reported, because the failure
+   * it causes is the agent being told something confidently wrong.
+   */
   private async skillsFor(answers: IntakeAnswers): Promise<SkillSummary[]> {
-    let files: string[];
+    let skills: SkillManifest[];
     try {
-      files = (await readdir(this.skillsDir)).filter((f) => f.endsWith('.md'));
-    } catch {
+      skills = await loadSkills(this.skillsDir);
+    } catch (error) {
+      console.error('[intake] a skill file is not valid, so no skills were written:', error);
       return [];
     }
 
-    const summaries: SkillSummary[] = [];
-    for (const file of files.sort()) {
-      const id = file.replace(/\.md$/, '');
-      if (!appliesTo(id, answers)) continue;
-      try {
-        summaries.push({ id, ...parseFrontMatter(await readFile(path.join(this.skillsDir, file), 'utf8')) });
-      } catch {
-        /* unreadable skill file: skip it */
-      }
-    }
-    return summaries;
+    return skillsFor(skills, { targetMode: answers.ambition }).map((skill) => ({
+      id: skill.id,
+      title: skill.title,
+      description: skill.description,
+      version: skill.version,
+    }));
   }
-}
-
-/** Skills whose names mark them as belonging to one ambition only. */
-function appliesTo(id: string, answers: IntakeAnswers): boolean {
-  if (id.startsWith('prototype-')) return !isForRealUsers(answers.ambition);
-  if (id.startsWith('production-')) return isForRealUsers(answers.ambition);
-  return true;
-}
-
-/** `name:` and `description:` out of a skill file's YAML header. */
-function parseFrontMatter(body: string): { title: string; description: string } {
-  const match = /^---\r?\n([\s\S]*?)\r?\n---/.exec(body);
-  const header = match?.[1] ?? '';
-  const field = (key: string): string =>
-    new RegExp(`^${key}:\\s*(.+)$`, 'm').exec(header)?.[1]?.trim().replace(/^["']|["']$/g, '') ?? '';
-  return { title: field('name') || 'Skill', description: field('description') };
 }
 
 /* --------------------------------------------------------------- phases -- */

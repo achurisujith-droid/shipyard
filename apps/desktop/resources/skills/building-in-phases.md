@@ -1,6 +1,9 @@
 ---
 name: Building in phases
 description: Finish one visible stage at a time and always leave the app running
+version: 1.0.0
+trust: verified
+reviewedAt: 2026-08-14
 ---
 
 # Building in phases

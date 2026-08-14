@@ -1,0 +1,15 @@
+{
+  "name": "@shipyard/project-contracts",
+  "version": "0.1.0",
+  "private": true,
+  "description": "ARCHITECTURE.md and the four shipyard.*.json files, derived from what is known",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsx harness/test-contracts.ts"
+  },
+  "dependencies": {
+    "@shipyard/shared": "*"
+  }
+}

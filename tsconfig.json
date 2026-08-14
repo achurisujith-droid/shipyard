@@ -26,6 +26,15 @@
       "path": "packages/component-library"
     },
     {
+      "path": "packages/skills-registry"
+    },
+    {
+      "path": "packages/task-composer"
+    },
+    {
+      "path": "packages/project-contracts"
+    },
+    {
       "path": "packages/project-state"
     },
     {

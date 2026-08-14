@@ -28,6 +28,24 @@
     },
     {
       "path": "../../packages/verification-runner"
+    },
+    {
+      "path": "../../packages/skills-registry"
+    },
+    {
+      "path": "../../packages/project-contracts"
+    },
+    {
+      "path": "../../packages/rulebook"
+    },
+    {
+      "path": "../../packages/readiness"
+    },
+    {
+      "path": "../../packages/capability-resolver"
+    },
+    {
+      "path": "../../packages/task-composer"
     }
   ]
 }
