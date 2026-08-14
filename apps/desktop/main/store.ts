@@ -5,6 +5,8 @@ import { app } from 'electron';
 
 import type { ProjectRecord } from '@shipyard/shared';
 
+import { Metadata } from './metadata';
+
 /**
  * Local state: the resolved CLI path, app settings, intake drafts, and the
  * projects we have created.
@@ -16,11 +18,21 @@ import type { ProjectRecord } from '@shipyard/shared';
 export class Store {
   private readonly db: Database.Database;
 
+  /**
+   * What each project is for, and what has been observed about it.
+   *
+   * Kept beside this rather than inside it: the app's own state and a project's
+   * evidence trail change for entirely different reasons, and one file that
+   * knows about both is one file two people edit at once.
+   */
+  readonly metadata: Metadata;
+
   constructor(file?: string) {
     const target = file ?? path.join(app.getPath('userData'), 'shipyard.db');
     this.db = new Database(target);
     this.db.pragma('journal_mode = WAL');
     this.migrate();
+    this.metadata = new Metadata(this.db);
   }
 
   private migrate(): void {

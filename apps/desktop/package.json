@@ -25,7 +25,8 @@
     "test:restart": "tsx scripts/test-restart.mts",
     "try": "tsx scripts/try-project.mts",
     "check:contrast": "node scripts/check-contrast.mjs",
-    "test:intake": "tsx scripts/test-intake.mts"
+    "test:intake": "tsx scripts/test-intake.mts",
+    "test:metadata": "tsx scripts/test-metadata.mts"
   },
   "dependencies": {
     "@shipyard/cli-bridge": "*",

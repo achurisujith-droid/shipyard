@@ -110,7 +110,7 @@ evidence the next one consumes:
 | | Task | State |
 | --- | --- | --- |
 | P0 | Repository and architecture baseline | Done |
-| P1 | Project metadata store | **Next** — intent, state, contract, evidence, readiness, rule evaluations. The SQLite store exists; these are new tables. |
+| P1 | Project metadata store | Done — intent, lifecycle, contract, capabilities, append-only evidence, runs, rule evaluations, readiness history, incidents, offers, findings, telemetry |
 | P2 | Project intent onboarding wizard | Four modes done. The remaining intent fields (regions, data sensitivity, payments, decisions, launch date) are not yet asked. |
 | P3 | Planning engine | `PROJECT.md` done. `ARCHITECTURE.md` and the four `shipyard.*.json` contracts are not. |
 | P4 | Rulebook engine | Done |
@@ -121,19 +121,37 @@ evidence the next one consumes:
 | P9 | Component library foundation | Not started — the largest single piece |
 | P10 | Capability resolver | Done |
 | P11 | Agent task composer | Not started |
-| P12 | Verification runner | Not started — **the one that matters most.** The gates the rules name have to be produced by something other than the agent. Until then the rulebook is a checklist rather than a system. |
-| P13 | Readiness dashboard | Calculator done; no UI |
+| P12 | Verification runner | Done — 44 gates, run in the project, evidence out |
+| P13 | Readiness dashboard | Calculator and history done; no UI |
 | P14 | Sentry and observability pipeline | Not started |
-| P15 | Incident-to-fix flow | Not started |
-| P16 | Service recommendation engine | Catalog and triggers done; no accept/snooze/decline UI |
-| P17 | Human escalation packet | Not started |
-| P18 | Security and licensing gates | Not started |
+| P15 | Incident-to-fix flow | Done — severity, risk, fix task, attempt tracking, escalation at two failures |
+| P16 | Service recommendation engine | Done — evidence-backed triggers, accept/snooze/decline; no UI |
+| P17 | Human escalation packet | Done — redacted, complete enough to start work from |
+| P18 | Security and licensing gates | Done — redaction, secret scan, import quarantine, licence scan |
 | P19 | Admin console | Not started |
-| P20 | Pilot validation dashboard | Not started |
+| P20 | Pilot validation dashboard | Delivery economics and CSV export done; no dashboard UI |
 
-The recommended order from here is P1 → P12 → P9 → P14/P15. P12 before the
-component library, because a library whose contract tests nothing runs is a
-library nobody can trust.
+### What is left, and why it is left
+
+Everything remaining needs something this session could not produce: a real
+starter application, a real vendor account, or a person looking at a screen.
+
+- **P9 component library** and **P3's `ARCHITECTURE.md`** need the
+  Next.js/Prisma/Postgres starter template to exist first. Twelve components
+  installing into nothing is twelve manifests.
+- **P7 recipes** and **P14 Sentry** need real accounts and real credentials to
+  be worth anything. A recipe that has never installed against the live service
+  is documentation with a version number.
+- **P11 task composer** is half-built: `composeFixTask` does it for incidents.
+  Doing it for plans and failed gates is the same shape.
+- **P8 skills registry** — the five skills exist and are copied into projects.
+  Manifests, versions and trust levels are a small, self-contained piece.
+- **P19 admin console** and every **UI** in P13/P16/P20. The engines return
+  exactly what those screens need; nothing has been drawn.
+
+The order from here is: starter template → P9 → P7/P14 → the UI. The engine
+layer is done and tested; what remains is mostly wiring it to a screen and to
+somebody's Sentry account.
 
 ## Deliberate holds
 
