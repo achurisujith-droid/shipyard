@@ -2,13 +2,21 @@
   "name": "@shipyard/desktop",
   "version": "0.1.0",
   "private": true,
+  "description": "Shipyard — describe the app you want, and watch it get built",
+  "productName": "Shipyard",
+  "author": "Shipyard",
+  "homepage": "https://github.com/achurisujith-droid/shipyard",
+  "license": "UNLICENSED",
   "main": "dist/main/index.js",
   "scripts": {
-    "build:main": "tsc -p tsconfig.main.json",
+    "build:main": "tsc -b tsconfig.main.json",
     "build:renderer": "vite build",
     "build": "npm run build:main && npm run build:renderer",
     "dev": "node scripts/dev.mjs",
     "start": "electron .",
+    "icon": "electron scripts/make-icon.mjs",
+    "package": "npm run build && electron-builder --config electron-builder.yml",
+    "package:dir": "npm run build && electron-builder --config electron-builder.yml --dir",
     "smoke": "node scripts/smoke.mjs",
     "smoke:session": "node scripts/smoke.mjs --session",
     "test": "tsx scripts/test-runner.mts",
@@ -31,7 +39,8 @@
     "@types/react": "^18.3.31",
     "@types/react-dom": "^18.3.7",
     "@vitejs/plugin-react": "^6.0.5",
-    "electron": "^43.2.0",
+    "electron": "43.2.0",
+    "electron-builder": "^26.15.3",
     "vite": "^8.2.0"
   }
 }

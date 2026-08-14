@@ -1,0 +1,111 @@
+name: Release
+
+# Tagging is the release trigger. Pushing `v0.2.0` builds that commit and
+# publishes the installer; nothing else does.
+#
+# `workflow_dispatch` exists to prove a build still works without spending a
+# version number on it. It uploads the installer as a workflow artifact and
+# creates no release.
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Windows installer
+    runs-on: windows-latest
+    # The toolchain fetch and NSIS compression of ~175 MB of runtimes are both
+    # slow. The default 360-minute limit would hide a hang for six hours.
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # `engines` is enforced by `engine-strict`, so the wrong major fails at
+      # install rather than at run time. It must match .nvmrc.
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The runtimes Shipyard ships to users. Pinned inside the script, so the
+      # cache key is the script itself: change a version, get a fresh fetch.
+      - name: Restore bundled runtimes
+        id: toolchain-cache
+        uses: actions/cache@v4
+        with:
+          path: apps/desktop/resources/toolchain
+          key: toolchain-win32-x64-${{ hashFiles('apps/desktop/scripts/fetch-toolchain.mjs') }}
+
+      - name: Fetch bundled runtimes
+        if: steps.toolchain-cache.outputs.cache-hit != 'true'
+        run: npm run toolchain -w @shipyard/desktop
+
+      # Fails the build if the toolchain is absent or truncated, rather than
+      # shipping an installer whose app cannot start a project.
+      - name: Verify bundled runtimes
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=apps/desktop/resources/toolchain/win32-x64
+          test -f "$root/toolchain.json"
+          test -f "$root/node/node.exe"
+          test -f "$root/postgres/bin/postgres.exe"
+          node -e "
+            const m = require('./$root/toolchain.json');
+            const total = m.bytes.node + m.bytes.postgres;
+            if (total < 120e6) throw new Error('toolchain is only ' + total + ' bytes');
+            console.log('node ' + m.nodeVersion + ', postgres ' + m.postgresVersion + ', ' + (total / 1e6).toFixed(0) + ' MB');
+          "
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Does not sign: there is no certificate. Set explicitly so a future
+      # secret being absent fails loudly instead of silently shipping unsigned.
+      - name: Build installer
+        run: npm run package -w @shipyard/desktop
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+
+      - name: Upload installer as a workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: shipyard-windows-installer
+          path: release/Shipyard-Setup-*.exe
+          if-no-files-found: error
+          retention-days: 14
+
+      # Only for tags. A dispatch run stops at the artifact above.
+      - name: Publish release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: release/Shipyard-Setup-*.exe
+          draft: false
+          generate_release_notes: true
+          body: |
+            ## Install on Windows
+
+            Download `Shipyard-Setup-*.exe` below and run it. It installs for
+            your user account only, so it never asks for an administrator
+            password.
+
+            **Windows will warn you before it runs.** The installer is not code
+            signed yet, so SmartScreen shows "Windows protected your PC".
+            Choose **More info**, then **Run anyway**. This is what an unsigned
+            download from a small publisher looks like; it is not a claim that
+            anything is wrong with the file.
+
+            You need a Claude subscription. Shipyard drives your own Claude Code
+            installation and never holds your credentials.

@@ -2,10 +2,52 @@
 
 A desktop app that drives the user's own Claude Code installation.
 
-**Scope 1** is two things: get Claude Code detected, installed if missing, signed
-in with the user's own subscription, and holding a working interactive chat
-session — and walk the user through an intake wizard that deterministically
-produces a `PROJECT.md`.
+It finds or installs Claude Code, gets the user signed into their own Anthropic
+account, asks seven plain-English questions about what they're building, turns
+those answers into an architecture brief (`PROJECT.md`) that Claude reads before
+writing any code, and then holds a live session against that project.
+
+Shipyard never sees the user's data, never holds their credentials, and never
+calls a model itself. It operates the CLI on the user's behalf, the way a person
+would. [`PRODUCT.md`](PRODUCT.md) is what it is for and who it is for.
+
+## Download
+
+**[Latest release](https://github.com/achurisujith-droid/shipyard/releases/latest)**
+— Windows 10 or 11, 64-bit. Download `Shipyard-Setup-<version>-x64.exe` and run
+it. It installs for your user account only, so it never asks for an
+administrator password.
+
+**Windows will warn you before it runs.** The installer is not code signed yet,
+so SmartScreen shows "Windows protected your PC". Choose **More info**, then
+**Run anyway**. That is what an unsigned download from a small publisher looks
+like — it is not a claim that anything is wrong with the file. Signing is
+[tracked in the packaging notes](docs/PACKAGING.md#things-that-will-bite).
+
+You need a Claude subscription. Shipyard drives your own Claude Code install; if
+you do not have one, it will walk you through it.
+
+The download is about 160 MB and installs to about 565 MB. Most of that is not
+Shipyard: the app carries its own Node and PostgreSQL so the project it builds
+for you can actually run on a machine that has neither.
+
+macOS and Linux are not built yet.
+
+## Status
+
+| Piece | State |
+| --- | --- |
+| cli-bridge: detect, auth, drive a session | Passing on Windows ([REPORT](packages/cli-bridge/REPORT.md)) |
+| Electron shell and first-run flow | Passing on Windows ([MILESTONE-2](docs/MILESTONE-2.md)) |
+| Intake wizard → `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
+| Run, preview, fix loop | Built ([RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md)) |
+| Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
+| Guided install and sign-in | Written, never executed — needs a clean VM |
+| macOS, Linux | Not started |
+
+Two paths have never run: the guided install of Claude Code, and sign-in. Both
+need a machine that does not already have a working, logged-in CLI. They are
+also the first two screens a real first-run user meets.
 
 ## Ground rules
 
@@ -26,11 +68,27 @@ packages/
   shared/       types and the IPC contract
   cli-bridge/   PTY spawn, TUI parsing, session state machine   <- the hard part
 apps/
-  desktop/      Electron app (Milestone 2, not started)
+  desktop/      the Electron app
+site/           the public landing page, deployed to GitHub Pages
 docs/
 ```
 
-## Requirements
+## Documentation
+
+| Document | What it settles |
+| --- | --- |
+| [PRODUCT.md](PRODUCT.md) | Who this is for, the voice, the design principles |
+| [ADR-001](docs/ADR-001-cli-transport.md) | Why the CLI is driven through a PTY and never headless |
+| [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
+| [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
+| [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |
+| [RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md) | The run-and-preview loop |
+| [cli-bridge REPORT](packages/cli-bridge/REPORT.md) | Findings and fragile areas in the TUI parsers |
+
+The REPORT is worth reading before touching the parsers — several behaviours
+there look like bugs in our code and are not.
+
+## Building it
 
 - **Node 22 LTS** (pinned in `.nvmrc`; `engine-strict` refuses other majors).
   Node 20 is end-of-life as of April 2026. `@anthropic-ai/claude-code` itself
@@ -42,6 +100,8 @@ fnm use          # or nvm use
 npm install
 npm run build
 ```
+
+To produce an installer, see [docs/PACKAGING.md](docs/PACKAGING.md).
 
 ## cli-bridge
 
@@ -61,11 +121,6 @@ npx tsx harness/run.ts --idle-minutes 30
 npx tsx harness/probe.ts          # startup, interstitials, permission menu
 npx tsx harness/probe-states.ts   # mid-turn streaming states
 ```
-
-Findings, fragile areas and deviations from the spec are recorded in
-[`packages/cli-bridge/REPORT.md`](packages/cli-bridge/REPORT.md). It is worth
-reading before touching the parsers — several behaviours there look like bugs in
-our code and are not.
 
 ## The desktop app
 

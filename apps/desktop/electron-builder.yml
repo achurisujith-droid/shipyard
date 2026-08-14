@@ -1,0 +1,104 @@
+# How Shipyard is packaged for download.
+#
+# Run with `npm run package -w @shipyard/desktop`, which builds first. The
+# release workflow runs the same command; there is no CI-only packaging path,
+# because a build you cannot reproduce locally is a build you cannot debug.
+#
+# The output is deliberately large (~400 MB installed). Shipyard carries Node
+# and PostgreSQL so that a user who has never installed either can still run the
+# app it builds for them — see docs/ADR-002-bundled-runtimes.md.
+
+appId: ai.shipyard.desktop
+productName: Shipyard
+copyright: Copyright © 2026 Shipyard
+
+# Pinned rather than a range. Electron is the runtime users get, not a
+# dependency we let float — and electron-builder cannot resolve a range from a
+# workspace root's hoisted node_modules anyway.
+electronVersion: 43.2.0
+
+directories:
+  # Repo root, so `release/` is one place regardless of which workspace built it.
+  output: ../../release
+  buildResources: build
+
+# Everything that goes inside app.asar. The renderer and main are compiled
+# output; sources are not shipped.
+files:
+  - dist/**/*
+  - package.json
+  - '!dist/.renderer-types/**'
+  - '!dist/**/*.map'
+  - '!dist/**/*.tsbuildinfo'
+  # The workspace packages are symlinked into node_modules and are otherwise
+  # copied in whole — sources, notes and all. Only their compiled library output
+  # belongs in a shipped app. The harness drives a real CLI, and its output
+  # directories hold transcripts of real sessions from a developer's machine.
+  - '!node_modules/@shipyard/*/src/**'
+  - '!node_modules/@shipyard/*/harness/**'
+  - '!node_modules/@shipyard/*/dist/harness/**'
+  - '!node_modules/@shipyard/*/.harness-out{,/**}'
+  - '!node_modules/@shipyard/*/.probe-out{,/**}'
+  - '!node_modules/@shipyard/*/dist/**/*.map'
+  - '!node_modules/@shipyard/*/**/*.tsbuildinfo'
+  - '!node_modules/@shipyard/*/{REPORT.md,tsconfig.json}'
+
+# Native modules cannot be loaded from inside an asar archive. Both of these
+# ship N-API prebuilds, so they are ABI-stable across Node and Electron and need
+# no rebuild — verified by `node scripts/check-native.cjs` under Electron.
+asarUnpack:
+  - '**/node_modules/better-sqlite3/**'
+  - '**/node_modules/node-pty/**'
+
+# The runtimes and the skill files, placed where main/index.ts looks for them:
+# `<resourcesPath>/resources/...` when app.isPackaged.
+extraResources:
+  - from: resources/toolchain
+    to: resources/toolchain
+  - from: resources/skills
+    to: resources/skills
+
+# Nothing is fetched at run time, so nothing needs to be fetched at install
+# time either. First launch on a locked-down laptop must not be where the
+# install story fails.
+npmRebuild: false
+buildDependenciesFromSource: false
+
+win:
+  icon: build/icon.ico
+  target:
+    - target: nsis
+      arch: [x64]
+  # Windows shows this in the "unknown publisher" dialog and in Task Manager.
+  executableName: Shipyard
+  # There is no code-signing certificate yet, so the download is unsigned and
+  # SmartScreen will warn on it. That is honest rather than hidden: see the
+  # download section of the README. Do not paper over it with a self-signed
+  # certificate, which produces the same warning plus a false claim.
+
+nsis:
+  # Per-user by default. A per-machine install needs an admin prompt, which a
+  # non-technical user on a work laptop often cannot answer.
+  perMachine: false
+  oneClick: false
+  allowToChangeInstallationDirectory: false
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Shipyard
+  # An upgrade must not leave the previous version's runtimes behind.
+  deleteAppDataOnUninstall: false
+  artifactName: Shipyard-Setup-${version}-${arch}.${ext}
+
+mac:
+  icon: build/icon.png
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [arm64, x64]
+
+linux:
+  icon: build/icon.png
+  category: Development
+  target:
+    - target: AppImage
+      arch: [x64]

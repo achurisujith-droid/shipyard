@@ -1,9 +1,14 @@
 name: Deploy GitHub Pages
 
+# Publishes site/ — the public landing page. The rest of the repo is the
+# product and is not served.
 on:
   push:
     branches:
       - main
+    paths:
+      - 'site/**'
+      - '.github/workflows/pages.yml'
   workflow_dispatch:
 
 permissions:
@@ -33,7 +38,7 @@ jobs:
       - name: Upload static site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: .
+          path: site
 
       - name: Deploy
         id: deployment

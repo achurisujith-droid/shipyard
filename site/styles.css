@@ -249,6 +249,7 @@ a {
 .proof,
 .packages,
 .roadmap,
+.download,
 .final-cta {
   padding: 96px 0;
 }
@@ -458,9 +459,65 @@ p {
   font-weight: 800;
 }
 
+.download {
+  background: var(--surface-strong);
+  border-top: 1px solid var(--line);
+}
+
+.download-grid {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 70px;
+  align-items: start;
+}
+
+.download-panel {
+  padding: 32px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: var(--shadow);
+}
+
+.download-panel .button {
+  width: 100%;
+}
+
+.download-meta {
+  margin: 16px 0 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+/* Named as a caution rather than coloured as one: an amber panel next to a
+   download button reads as "this file is unsafe", which is the opposite of
+   what it says. */
+.download-note {
+  margin: 20px 0 0;
+  padding: 16px 18px;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  background: var(--surface);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 10px 10px 0;
+}
+
+.download-source {
+  display: inline-block;
+  margin-top: 22px;
+  color: var(--green-dark);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
 @media (max-width: 980px) {
   .nav-links {
     display: none;
+  }
+
+  .download-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
   }
 
   .hero h1 {
@@ -521,8 +578,13 @@ p {
   .proof,
   .packages,
   .roadmap,
+  .download,
   .final-cta {
     padding: 72px 0;
+  }
+
+  .download-panel {
+    padding: 24px;
   }
 
   .section-wrap {
