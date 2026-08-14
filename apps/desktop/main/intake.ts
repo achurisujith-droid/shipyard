@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import {
   AMBITION_PROFILES,
+  isForRealUsers,
   type BuildPhase,
   type EnvironmentNeed,
   type IntakeAnswers,
@@ -98,8 +99,8 @@ export class Intake {
 
 /** Skills whose names mark them as belonging to one ambition only. */
 function appliesTo(id: string, answers: IntakeAnswers): boolean {
-  if (id.startsWith('prototype-')) return answers.ambition === 'prototype';
-  if (id.startsWith('production-')) return answers.ambition === 'production';
+  if (id.startsWith('prototype-')) return !isForRealUsers(answers.ambition);
+  if (id.startsWith('production-')) return isForRealUsers(answers.ambition);
   return true;
 }
 
@@ -123,7 +124,7 @@ function parseFrontMatter(body: string): { title: string; description: string } 
  */
 function phasesFor(answers: IntakeAnswers): BuildPhase[] {
   const screensFirst = answers.buildOrder === 'screens-first';
-  const production = answers.ambition === 'production';
+  const production = isForRealUsers(answers.ambition);
 
   const phases: BuildPhase[] = [];
 
@@ -251,7 +252,7 @@ const SIGNALS: { pattern: RegExp; need: (production: boolean) => EnvironmentNeed
  * out on launch day is a disaster.
  */
 function environmentFor(answers: IntakeAnswers): EnvironmentNeed[] {
-  const production = answers.ambition === 'production';
+  const production = isForRealUsers(answers.ambition);
   const needs: EnvironmentNeed[] = [
     {
       name: 'Node',

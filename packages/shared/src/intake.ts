@@ -11,12 +11,30 @@
  * changes nothing is a question that should not be asked.
  */
 
-/** How far this build is going, right now. */
-export type Ambition =
-  /** Something to look at, click through, and learn from. Days. */
-  | 'prototype'
-  /** Something strangers can sign into and pay for. Weeks. */
-  | 'production';
+import { modeAtLeast, type TargetMode } from './production';
+
+export type { TargetMode };
+
+/**
+ * How far this build is going, right now.
+ *
+ * The question the whole system hangs off. Everything downstream — which rules
+ * apply, which checks are required, what counts as ready — is decided by this
+ * one answer, which is why it is asked in the user's language and never
+ * inferred from their idea.
+ */
+export type Ambition = TargetMode;
+
+/**
+ * Does this project owe its users the things a real product owes them?
+ *
+ * The line falls between "people I know are looking at it" and "people I do not
+ * know are relying on it". Crossing it is what makes sign-in, backups and
+ * monitoring obligations rather than nice-to-haves.
+ */
+export function isForRealUsers(mode: TargetMode): boolean {
+  return modeAtLeast(mode, 'customer_pilot');
+}
 
 /** Where the requirements come from. */
 export type RequirementsSource =
@@ -133,12 +151,32 @@ export interface AmbitionProfile {
  */
 export const AMBITION_PROFILES: readonly AmbitionProfile[] = [
   {
-    id: 'prototype',
+    id: 'ui_concept',
+    title: 'Something to look at',
+    summary:
+      'The screens, and the path between them, filled with made-up information. Nothing behind it is real.',
+    includes: [
+      'Every screen, and working navigation between them',
+      'Made-up information that looks like the real thing',
+      'Runs on your computer, ready to show on a call',
+    ],
+    excludes: [
+      'Anything you type being there tomorrow',
+      'Signing in — it is drawn, not built',
+      'Any of it working when you are not in the room',
+    ],
+    effort: 'A day or two.',
+    bestWhen:
+      'You are trying to explain the idea to someone, and words are not doing it. Wrong if anyone might mistake it for a product.',
+  },
+  {
+    id: 'functional_prototype',
     title: 'A working prototype',
-    summary: 'Something you can click through and show people. Not something strangers should sign into.',
+    summary:
+      'The main thing your product does, actually working. Not something strangers should sign into.',
     includes: [
       'Every screen, working, with real navigation between them',
-      'Real information you can add, change and delete',
+      'Real information you can add, change and delete, that is still there tomorrow',
       'Runs on your computer, and can go behind a private link when you want to show someone',
     ],
     excludes: [
@@ -152,19 +190,40 @@ export const AMBITION_PROFILES: readonly AmbitionProfile[] = [
       'You want to find out whether the idea works, show an investor, or put it in front of a handful of people you already know.',
   },
   {
-    id: 'production',
-    title: 'Ready for real users',
-    summary: 'Something a stranger can sign up for, pay for, and trust with their information.',
+    id: 'customer_pilot',
+    title: 'A pilot with real people',
+    summary:
+      'A controlled group of real users, doing real work in it. The first version where their bad day is your problem.',
     includes: [
       'Real accounts, passwords, and password resets',
+      'Their work is still there next week, and backed up',
+      'One person cannot see another person’s information',
+      'You find out it is broken before they tell you',
+      'The journeys that matter are checked automatically, every time',
+    ],
+    excludes: [
+      'Being able to walk away from it. People are depending on this now.',
+      'Cheap changes of mind — once real data is in it, rework costs more',
+    ],
+    effort: 'Weeks. Most of the work is the part nobody sees.',
+    bestWhen:
+      'You have people willing to try it, you invited them by name, and you can ring them if something goes wrong.',
+  },
+  {
+    id: 'production_product',
+    title: 'A product people pay for',
+    summary:
+      'Strangers sign up, pay, and depend on it. Someone is accountable for it staying up.',
+    includes: [
+      'Everything a pilot has, plus the things that only matter at 3am',
       'Payments, if you are charging',
-      'One customer can never see another customer’s information',
-      'Backups, and a warning when something breaks at 3am',
+      'A backup someone has actually restored from, rather than hoping',
+      'A written answer to “it is down, what now?”',
       'The legal obligations that come with holding other people’s information',
     ],
     excludes: [
       'A quick answer to “is this idea any good?” — you commit before you see it',
-      'Cheap changes of mind. Once accounts and payments are real, rework costs more.',
+      'Doing it alone. Some of this needs a person to sign it off.',
     ],
     effort:
       'Weeks, not days — usually three to five times the work of a prototype, and most of that work is invisible.',

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import {
   AMBITION_ADVICE,
   AMBITION_PROFILES,
+  isForRealUsers,
   type Ambition,
   type BuildOrder,
   type IntakeAnswers,
@@ -400,7 +401,7 @@ function OrderStep({
         </button>
       </div>
 
-      {ambition === 'production' && chosen === 'screens-first' && (
+      {isForRealUsers(ambition ?? 'functional_prototype') && chosen === 'screens-first' && (
         <div className="advice">
           <span className="advice-mark" aria-hidden="true">
             ★

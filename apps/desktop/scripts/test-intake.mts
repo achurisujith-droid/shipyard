@@ -31,7 +31,7 @@ function answers(overrides: Partial<IntakeAnswers>): IntakeAnswers {
   return {
     idea: 'A shop that sells phone cases where I can add products and take orders',
     name: 'phone-cases',
-    ambition: 'prototype',
+    ambition: 'functional_prototype',
     requirements: 'conversation',
     buildOrder: 'screens-first',
     ...overrides,
@@ -44,7 +44,7 @@ async function main(): Promise<void> {
   try {
     if (process.argv.includes('--show')) {
       const plan = await intake.plan(
-        answers({ ambition: 'production', idea: 'A booking site where customers pay a deposit' }),
+        answers({ ambition: 'production_product', idea: 'A booking site where customers pay a deposit' }),
         path.join(root, 'demo'),
       );
       console.log(plan.projectMarkdown);
@@ -100,7 +100,7 @@ async function main(): Promise<void> {
 
     // --- production -------------------------------------------------------
     const prod = await intake.plan(
-      answers({ ambition: 'production', requirements: 'document', requirementsDocument: 'Sell cases. Take card payments. Email a receipt.' }),
+      answers({ ambition: 'production_product', requirements: 'document', requirementsDocument: 'Sell cases. Take card payments. Email a receipt.' }),
       path.join(root, 'prod'),
     );
 

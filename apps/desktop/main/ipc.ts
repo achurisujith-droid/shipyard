@@ -12,6 +12,8 @@ import {
   type InvokeMessage,
   type ProjectPlan,
   type ProjectRecord,
+  type TargetMode,
+  TARGET_MODE_ORDER,
 } from '@shipyard/shared';
 
 import type { CLIManager } from './cli-manager';
@@ -222,7 +224,10 @@ function asAnswers(input: unknown): IntakeAnswers {
   const answers: IntakeAnswers = {
     idea,
     name: folderName(text('name', 120) || idea),
-    ambition: raw['ambition'] === 'production' ? 'production' : 'prototype',
+    ambition: TARGET_MODE_ORDER.includes(raw['ambition'] as TargetMode)
+      ? (raw['ambition'] as TargetMode)
+      // An unknown mode must not silently become the least demanding one.
+      : 'functional_prototype',
     requirements: raw['requirements'] === 'document' ? 'document' : 'conversation',
     buildOrder: raw['buildOrder'] === 'end-to-end' ? 'end-to-end' : 'screens-first',
   };
