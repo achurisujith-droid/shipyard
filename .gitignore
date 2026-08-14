@@ -1,5 +1,21 @@
+node_modules/
+dist/
+release/
+*.tsbuildinfo
+
+# Harness and probe output — machine-specific transcripts of real CLI runs.
+.harness-out/
+.probe-out/
+
+# CLI builds pinned for "one release back" testing. Fetched, not authored.
+.cli-versions/
+
+# The runtimes Shipyard ships to users (~175 MB of Node + PostgreSQL).
+# Fetched at build time by apps/desktop/scripts/fetch-toolchain.mjs, never
+# committed — see docs/ADR-002-bundled-runtimes.md.
+apps/desktop/resources/toolchain/
+
 .DS_Store
 Thumbs.db
 *.tmp
 *.log
-

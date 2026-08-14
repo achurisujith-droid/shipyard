@@ -1,0 +1,20 @@
+{
+  "name": "@shipyard/cli-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "probe": "tsx harness/probe.ts",
+    "harness": "tsx harness/run.ts",
+    "probe:prefilled": "tsx harness/probe-prefilled.ts",
+    "probe:codex": "tsx harness/probe-codex.ts",
+    "test:providers": "tsx harness/test-providers.ts"
+  },
+  "dependencies": {
+    "@shipyard/shared": "*",
+    "@xterm/headless": "^5.5.0",
+    "node-pty": "^1.0.0"
+  }
+}

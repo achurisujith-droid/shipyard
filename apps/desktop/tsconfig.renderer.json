@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "dist/.renderer-types",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "types": [],
+    "noEmit": false,
+    "emitDeclarationOnly": true
+  },
+  "include": ["renderer/**/*", "vite.config.mts"],
+  "references": [{ "path": "../../packages/shared" }]
+}

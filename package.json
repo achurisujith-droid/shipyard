@@ -1,0 +1,25 @@
+{
+  "name": "shipyard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Shipyard - desktop app that drives Claude Code",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22.12.0 <23"
+  },
+  "scripts": {
+    "build": "tsc -b",
+    "typecheck": "tsc -b --force",
+    "clean": "tsc -b --clean",
+    "probe": "npm run probe -w @shipyard/cli-bridge",
+    "harness": "npm run harness -w @shipyard/cli-bridge"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  }
+}

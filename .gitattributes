@@ -1,0 +1,14 @@
+# Normalize to LF in the repository. The app is developed on Windows but built
+# on Linux runners in CI, and shell scripts with CRLF fail there in ways that
+# look like missing files.
+* text=auto eol=lf
+
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+*.png binary
+*.ico binary
+*.icns binary
+*.exe binary
+*.dll binary

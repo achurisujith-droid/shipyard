@@ -1,0 +1,8 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/cli-bridge" },
+    { "path": "apps/desktop/tsconfig.main.json" }
+  ]
+}
