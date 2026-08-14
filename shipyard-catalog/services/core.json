@@ -1,0 +1,102 @@
+[
+  {
+    "id": "sentry_setup",
+    "name": "Sentry Setup",
+    "deliverable": "Error monitoring wired up, a test error received, and the dashboard linked to your project.",
+    "priceMin": 149,
+    "priceMax": 299,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Shipyard can install this itself and walk you through creating the account. Most people manage it in about twenty minutes.",
+    "enabled": true
+  },
+  {
+    "id": "domain_ssl_setup",
+    "name": "Domain and SSL Setup",
+    "deliverable": "Your domain connected, HTTPS verified, and the DNS settings written down so you can change them later.",
+    "priceMin": 149,
+    "priceMax": 299,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Your deployment provider can do this from its dashboard. It is fiddly rather than hard.",
+    "enabled": true
+  },
+  {
+    "id": "payment_integration_review",
+    "name": "Payment Integration Review",
+    "deliverable": "A developer reads the billing code: webhook signatures, repeated messages, what happens when a card is declined, and whether people get what they paid for.",
+    "priceMin": 399,
+    "priceMax": 799,
+    "priceUnit": "project",
+    "selfServiceAlternative": "The automated payment checks cover the common faults. This is for when real money is about to move and you want a person to have looked.",
+    "enabled": true
+  },
+  {
+    "id": "launch_readiness_audit",
+    "name": "Launch Readiness Audit",
+    "deliverable": "A written report: what is ready, what is not, what would happen if you launched anyway, and a launch decision.",
+    "priceMin": 500,
+    "priceMax": 1000,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Your readiness score already lists every blocker with a next action. This is a person checking the things a test cannot.",
+    "enabled": true
+  },
+  {
+    "id": "manual_qa_pack",
+    "name": "Manual QA Pack",
+    "deliverable": "A test plan, a full run through it by hand, every issue written up, and an automated set that catches them next time.",
+    "priceMin": 750,
+    "priceMax": 1500,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Ask Claude to write browser tests for your main journeys. This is for when you want someone to try to break it on purpose.",
+    "enabled": true
+  },
+  {
+    "id": "security_privacy_review",
+    "name": "Security and Privacy Review",
+    "deliverable": "Findings, the fixes, a plain-language note on what risk remains, and a referral to a lawyer where the answer is not technical.",
+    "priceMin": 750,
+    "priceMax": 2500,
+    "priceUnit": "project",
+    "selfServiceAlternative": "The automated scans catch known holes. They cannot tell you whether what you are doing with people's data is lawful where you operate.",
+    "enabled": true
+  },
+  {
+    "id": "fix_sprint",
+    "name": "Fix Sprint",
+    "deliverable": "A developer fixes one scoped problem and leaves a test proving it stays fixed.",
+    "priceMin": 500,
+    "priceMax": 2000,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Keep going with Claude. This is worth it once the same problem has survived two attempts — that usually means the cause is somewhere other than where it appears.",
+    "enabled": true
+  },
+  {
+    "id": "mvp_completion",
+    "name": "MVP Completion",
+    "deliverable": "A fixed scope, taken to pilot-ready by people who are accountable for finishing it.",
+    "priceMin": 5000,
+    "priceMax": 10000,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Everything here is something you can reach yourself. This is for when a date matters more than the saving.",
+    "enabled": true
+  },
+  {
+    "id": "operate_plan",
+    "name": "Operate Plan",
+    "deliverable": "Monitoring watched, updates applied on a schedule, incidents triaged, and a person to ask.",
+    "priceMin": 99,
+    "priceMax": 499,
+    "priceUnit": "month",
+    "selfServiceAlternative": "Shipyard will keep showing you incidents and readiness for free. This is for when you would rather not be the one who notices.",
+    "enabled": true
+  },
+  {
+    "id": "legal_referral",
+    "name": "Legal Referral",
+    "deliverable": "An introduction to a solicitor who works on automated decision-making, and a summary of your situation for them to read first.",
+    "priceMin": 0,
+    "priceMax": 0,
+    "priceUnit": "project",
+    "selfServiceAlternative": "Free. Software that decides things about people has legal obligations that no amount of testing addresses, and we would rather you heard that early.",
+    "enabled": true
+  }
+]

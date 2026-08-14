@@ -1,0 +1,18 @@
+{
+  "name": "@shipyard/capability-resolver",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Turns founder intent into components, vendors, recipes and gates",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsx harness/test-resolver.ts"
+  },
+  "dependencies": {
+    "@shipyard/shared": "*"
+  },
+  "devDependencies": {
+    "@shipyard/rulebook": "*"
+  }
+}

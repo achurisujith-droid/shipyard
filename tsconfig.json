@@ -8,6 +8,9 @@
       "path": "packages/cli-bridge"
     },
     {
+      "path": "packages/capability-resolver"
+    },
+    {
       "path": "packages/project-state"
     },
     {

@@ -70,9 +70,10 @@ packages/
   rulebook/       what a project owes its users, evaluated from evidence
   readiness/      the score, and what stands between here and launch
   project-state/  lifecycle states and evidence-backed transitions
+  capability-resolver/  intent -> components, vendors, recipes, gates
 apps/
   desktop/        the Electron app
-shipyard-catalog/ rules as data, outside application code
+shipyard-catalog/ rules, capabilities, vendors and services as data
 site/             the public landing page, deployed to GitHub Pages
 docs/
 ```

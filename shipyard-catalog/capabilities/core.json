@@ -1,0 +1,177 @@
+[
+  {
+    "id": "database_schema",
+    "label": "Somewhere to keep the information",
+    "category": "foundation",
+    "requiredFrom": "functional_prototype",
+    "components": ["postgres_schema"],
+    "skills": ["schema-designer"],
+    "gates": ["database_persists_across_restart"]
+  },
+  {
+    "id": "authentication",
+    "label": "Signing in",
+    "category": "identity",
+    "requiredFrom": "customer_pilot",
+    "components": ["auth"],
+    "skills": ["auth-rbac-reviewer"],
+    "gates": ["auth_login_works", "protected_routes_enforced"],
+    "serviceTriggers": ["launch_readiness_audit"]
+  },
+  {
+    "id": "organization_tenancy",
+    "label": "Keeping customers separate",
+    "category": "identity",
+    "requiredFrom": "customer_pilot",
+    "components": ["organization_tenancy"],
+    "gates": ["rbac_permission_tests_pass"]
+  },
+  {
+    "id": "role_permissions",
+    "label": "Who is allowed to do what",
+    "category": "identity",
+    "requiredFrom": "customer_pilot",
+    "triggeredBy": ["sensitiveData"],
+    "components": ["rbac"],
+    "skills": ["auth-rbac-reviewer"],
+    "gates": ["rbac_permission_tests_pass", "protected_routes_enforced"],
+    "serviceTriggers": ["security_privacy_review"]
+  },
+  {
+    "id": "admin_dashboard",
+    "label": "A way for you to see what is going on",
+    "category": "operations",
+    "requiredFrom": "customer_pilot",
+    "components": ["admin_dashboard_shell"]
+  },
+  {
+    "id": "transactional_email",
+    "label": "Emailing your users",
+    "category": "communication",
+    "requiredFrom": "customer_pilot",
+    "components": ["transactional_email"],
+    "vendors": ["resend", "postmark"],
+    "recipes": ["transactional_email_basic"],
+    "env": ["EMAIL_API_KEY", "EMAIL_FROM"],
+    "gates": ["transactional_email_sends"]
+  },
+  {
+    "id": "subscription_payments",
+    "label": "Taking payment",
+    "category": "money",
+    "triggeredBy": ["payments"],
+    "humanReviewWhen": ["payments"],
+    "components": ["stripe_subscription_billing"],
+    "skills": ["stripe-webhook-debugger"],
+    "vendors": ["stripe"],
+    "recipes": ["stripe_checkout", "stripe_webhooks"],
+    "env": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+    "gates": [
+      "stripe_webhook_signature_verified",
+      "stripe_idempotency_test_passed",
+      "failed_payment_flow_tested",
+      "payment_events_logged"
+    ],
+    "serviceTriggers": ["payment_integration_review"]
+  },
+  {
+    "id": "file_storage",
+    "label": "Letting people upload files",
+    "category": "data",
+    "components": ["s3_file_storage"],
+    "vendors": ["cloudflare_r2"],
+    "recipes": ["s3_storage_basic"],
+    "env": ["S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"],
+    "gates": ["file_storage_round_trip"]
+  },
+  {
+    "id": "audit_logging",
+    "label": "A record of who did what",
+    "category": "compliance",
+    "requiredFrom": "customer_pilot",
+    "triggeredBy": ["sensitiveData"],
+    "components": ["audit_logging"],
+    "gates": ["audit_log_records_access"]
+  },
+  {
+    "id": "privacy_export_delete",
+    "label": "Handing someone their data back, or deleting it",
+    "category": "compliance",
+    "triggeredBy": ["sensitiveData"],
+    "components": ["privacy_export_delete"],
+    "gates": ["privacy_export_delete_works", "data_retention_statement_written"],
+    "serviceTriggers": ["security_privacy_review"]
+  },
+  {
+    "id": "human_review_workflow",
+    "label": "A person checking the decisions",
+    "category": "compliance",
+    "triggeredBy": ["aiAffectsConsequentialDecision"],
+    "humanReviewWhen": ["aiAffectsConsequentialDecision"],
+    "components": ["human_review_workflow"],
+    "gates": [
+      "human_review_step_present",
+      "decision_consent_recorded",
+      "decision_audit_trail_complete"
+    ],
+    "serviceTriggers": ["security_privacy_review", "legal_referral"]
+  },
+  {
+    "id": "error_monitoring",
+    "label": "Finding out when it breaks",
+    "category": "operations",
+    "requiredFrom": "customer_pilot",
+    "triggeredBy": ["publicFacing"],
+    "components": ["sentry_error_monitoring"],
+    "skills": ["sentry-integration-debugger"],
+    "vendors": ["sentry"],
+    "recipes": ["sentry_nextjs_basic"],
+    "env": ["SENTRY_DSN", "SENTRY_ORG", "SENTRY_PROJECT"],
+    "gates": ["error_monitoring_receives_test_event", "release_tagged_in_monitoring"],
+    "serviceTriggers": ["sentry_setup"]
+  },
+  {
+    "id": "uptime_monitoring",
+    "label": "Knowing it is still up",
+    "category": "operations",
+    "requiredFrom": "production_product",
+    "vendors": ["better_stack"],
+    "gates": ["uptime_check_configured"]
+  },
+  {
+    "id": "deployment",
+    "label": "Somewhere for it to live on the internet",
+    "category": "operations",
+    "requiredFrom": "customer_pilot",
+    "vendors": ["railway"],
+    "recipes": ["railway_deployment", "postgres_deployment"],
+    "gates": ["deployed_health_check_passes", "domain_ssl_verified"],
+    "serviceTriggers": ["domain_ssl_setup"]
+  },
+  {
+    "id": "background_jobs",
+    "label": "Work that happens in the background",
+    "category": "foundation",
+    "components": ["background_job_runner"]
+  },
+  {
+    "id": "analytics",
+    "label": "Seeing how people use it",
+    "category": "operations",
+    "vendors": ["posthog"]
+  },
+  {
+    "id": "native_mobile",
+    "label": "An app in the App Store",
+    "category": "foundation",
+    "supported": false,
+    "insteadUse": "Shipyard builds web apps, which work on a phone browser. A real App Store app needs a different toolchain and a developer account."
+  },
+  {
+    "id": "realtime_voice",
+    "label": "Live voice or video",
+    "category": "communication",
+    "supported": false,
+    "insteadUse": "This needs infrastructure Shipyard does not run yet. A scheduled call link from an existing tool is the usual stand-in."
+  }
+]

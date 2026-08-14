@@ -1,0 +1,121 @@
+[
+  {
+    "id": "sentry",
+    "name": "Sentry",
+    "capabilities": ["error_monitoring"],
+    "preferred": true,
+    "setupComplexity": "low",
+    "riskLevel": "low",
+    "freeTier": {
+      "available": true,
+      "limits": "A developer plan with a monthly error allowance, for one user.",
+      "upgradeTrigger": "More than one person needs access, or the error volume of a real pilot.",
+      "lastVerifiedAt": "unverified",
+      "sourceUrl": "https://sentry.io/pricing/"
+    },
+    "env": ["SENTRY_DSN", "SENTRY_ORG", "SENTRY_PROJECT"],
+    "webhooks": true,
+    "alternatives": ["rollbar", "bugsnag"],
+    "enabled": true,
+    "notes": "First integration built: it creates a launch gate and a fix loop at the same time."
+  },
+  {
+    "id": "railway",
+    "name": "Railway",
+    "capabilities": ["deployment", "postgres_hosting"],
+    "preferred": true,
+    "setupComplexity": "low",
+    "riskLevel": "low",
+    "webhooks": true,
+    "alternatives": ["vercel", "render", "fly_io"],
+    "enabled": true,
+    "notes": "The one deployment path for V1. Alternatives are tracked, not built."
+  },
+  {
+    "id": "stripe",
+    "name": "Stripe",
+    "capabilities": ["subscription_payments"],
+    "preferred": true,
+    "setupComplexity": "high",
+    "riskLevel": "high",
+    "env": ["STRIPE_SECRET_KEY", "STRIPE_WEBHOOK_SECRET"],
+    "webhooks": true,
+    "alternatives": ["paddle"],
+    "enabled": true,
+    "notes": "Account verification can take days. Say so before a founder plans a launch date around it."
+  },
+  {
+    "id": "resend",
+    "name": "Resend",
+    "capabilities": ["transactional_email"],
+    "preferred": true,
+    "setupComplexity": "medium",
+    "riskLevel": "low",
+    "env": ["EMAIL_API_KEY", "EMAIL_FROM"],
+    "alternatives": ["postmark", "sendgrid"],
+    "enabled": true,
+    "notes": "Sending needs a verified domain. A laptop cannot send mail anyone will receive."
+  },
+  {
+    "id": "postmark",
+    "name": "Postmark",
+    "capabilities": ["transactional_email"],
+    "preferred": false,
+    "setupComplexity": "medium",
+    "riskLevel": "low",
+    "env": ["EMAIL_API_KEY", "EMAIL_FROM"],
+    "enabled": true
+  },
+  {
+    "id": "cloudflare_r2",
+    "name": "Cloudflare R2",
+    "capabilities": ["file_storage"],
+    "preferred": true,
+    "setupComplexity": "medium",
+    "riskLevel": "low",
+    "env": ["S3_BUCKET", "S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"],
+    "alternatives": ["aws_s3", "supabase_storage"],
+    "enabled": true,
+    "notes": "S3-compatible, so the adapter works against any of the alternatives."
+  },
+  {
+    "id": "better_stack",
+    "name": "Better Stack",
+    "capabilities": ["uptime_monitoring"],
+    "preferred": true,
+    "setupComplexity": "low",
+    "riskLevel": "low",
+    "alternatives": ["uptimerobot"],
+    "enabled": true
+  },
+  {
+    "id": "posthog",
+    "name": "PostHog",
+    "capabilities": ["analytics"],
+    "preferred": true,
+    "setupComplexity": "low",
+    "riskLevel": "low",
+    "alternatives": ["plausible"],
+    "enabled": true
+  },
+  {
+    "id": "cloudflare_dns",
+    "name": "Cloudflare",
+    "capabilities": ["dns_ssl"],
+    "preferred": true,
+    "setupComplexity": "medium",
+    "riskLevel": "low",
+    "enabled": true,
+    "notes": "Guidance only in V1. Automating DNS changes for a user is not something to get wrong."
+  },
+  {
+    "id": "github",
+    "name": "GitHub",
+    "capabilities": ["git_hosting"],
+    "preferred": true,
+    "setupComplexity": "low",
+    "riskLevel": "low",
+    "alternatives": ["gitlab"],
+    "enabled": true
+  }
+]

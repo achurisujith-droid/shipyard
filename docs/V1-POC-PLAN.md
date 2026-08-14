@@ -64,11 +64,18 @@ The decision layer — the part that makes "ready" a fact rather than an opinion
 | [`@shipyard/rulebook`](../packages/rulebook/) | Loads rules from `shipyard-catalog/rules/`, evaluates them against a project, explains each finding in the user's words. |
 | [`@shipyard/readiness`](../packages/readiness/) | 10 weighted categories summing to 100, per-mode thresholds, blockers vs warnings, next actions, service triggers. |
 | [`@shipyard/project-state`](../packages/project-state/) | 15 states, evidence-backed transitions, sign-off on the two that expose real users. |
-| [`shipyard-catalog/rules/`](../shipyard-catalog/rules/) | 14 rules as data, outside application code. |
+| [`@shipyard/capability-resolver`](../packages/capability-resolver/) | Turns intent into capabilities, each with the components, vendor, recipes and gates behind it — and a reason in the founder's words. |
+| [`shipyard-catalog/`](../shipyard-catalog/) | 14 rules, 18 capabilities, 10 vendors and 10 service offers, all as data outside application code. |
 
-Covered by `npm test -w @shipyard/rulebook` — 33 cases over whole-project
+Covered by `npm test -w @shipyard/rulebook` (33 cases) and
+`npm test -w @shipyard/capability-resolver` (31 cases), both over whole-project
 fixtures rather than isolated conditions, because the failure this layer exists
 to prevent is a *combination* that looks fine rule by rule.
+
+Two cross-checks are asserted rather than assumed: every vendor and service a
+capability names must exist in the catalog, and the resolver and the rulebook
+must produce the same gate vocabulary. Without the second, readiness would be
+scored against obligations nothing in the system produces.
 
 ### The three decisions that layer forced
 
@@ -89,29 +96,44 @@ people. It is permission to proceed, never permission to skip. A founder who
 wants to launch is the last person who should be able to override the evidence
 that says they should not.
 
-## Next, in order
+**An unverified free tier is never repeated to the user.** Free tiers change
+without notice, and a limit quoted from memory is a confident wrong answer a
+founder will plan a launch date around. The catalog may hold unverified entries;
+`displayableFreeTier()` is the only way to read them, and it returns nothing
+without a real verification date and a source URL.
 
-Each layer produces the evidence the next one consumes.
+## Backlog
 
-1. **Remap intake to the four target modes.** Everything above keys off
-   `targetMode`, and the wizard still produces a two-value `ambition`. Touches
-   `intake.ts`, `IntakeScreen.tsx`, `ipc.ts`, `test-intake.mts`.
-2. **Project metadata store.** Persist intent, state, contract, evidence,
-   readiness and rule evaluations. The store exists; these are new tables.
-3. **Capability resolver + vendor catalog.** Intent → capabilities →
-   components, vendors, recipes, gates. Catalog entries carry
-   `last_verified_at` and a source URL; free-tier limits are never hard-coded
-   into rules.
-4. **Verification runner.** The gates the rules name have to be produced by
-   something other than the agent. This is what turns the rulebook from a
-   checklist into a system.
-5. **Component library.** Starter template, then auth, tenancy, RBAC, admin
-   shell, email, Stripe billing, storage, audit logging, Sentry, jobs, privacy
-   export/delete. Protected paths enforced in diffs.
-6. **Sentry recipe and incident-to-fix loop.** Chosen first among integrations
-   because it creates a readiness gate and a fix loop at the same time.
-7. **Service recommendations and escalation packets.** The triggers already come
-   out of rule evaluation; what is missing is the catalog and the packet.
+P0–P5 and P10 are done. The rest, in the plan's order, each layer producing the
+evidence the next one consumes:
+
+| | Task | State |
+| --- | --- | --- |
+| P0 | Repository and architecture baseline | Done |
+| P1 | Project metadata store | **Next** — intent, state, contract, evidence, readiness, rule evaluations. The SQLite store exists; these are new tables. |
+| P2 | Project intent onboarding wizard | Four modes done. The remaining intent fields (regions, data sensitivity, payments, decisions, launch date) are not yet asked. |
+| P3 | Planning engine | `PROJECT.md` done. `ARCHITECTURE.md` and the four `shipyard.*.json` contracts are not. |
+| P4 | Rulebook engine | Done |
+| P5 | Project state machine | Done (transition UI not built) |
+| P6 | Vendor catalog | Done as data; admin edit UI not built |
+| P7 | Integration recipe runner | Not started |
+| P8 | Verified skills registry | 5 skills exist without manifests, versions or a registry |
+| P9 | Component library foundation | Not started — the largest single piece |
+| P10 | Capability resolver | Done |
+| P11 | Agent task composer | Not started |
+| P12 | Verification runner | Not started — **the one that matters most.** The gates the rules name have to be produced by something other than the agent. Until then the rulebook is a checklist rather than a system. |
+| P13 | Readiness dashboard | Calculator done; no UI |
+| P14 | Sentry and observability pipeline | Not started |
+| P15 | Incident-to-fix flow | Not started |
+| P16 | Service recommendation engine | Catalog and triggers done; no accept/snooze/decline UI |
+| P17 | Human escalation packet | Not started |
+| P18 | Security and licensing gates | Not started |
+| P19 | Admin console | Not started |
+| P20 | Pilot validation dashboard | Not started |
+
+The recommended order from here is P1 → P12 → P9 → P14/P15. P12 before the
+component library, because a library whose contract tests nothing runs is a
+library nobody can trust.
 
 ## Deliberate holds
 
@@ -122,23 +144,40 @@ Each layer produces the evidence the next one consumes.
 - **Guided install and sign-in.** Written, never executed; needs a clean VM.
 - **macOS and Linux.** Configured in the packaging config, never built or run.
 
+## Milestones
+
+| | Weeks | Exit criteria |
+| --- | --- | --- |
+| 1 Foundation | 1–2 | A project record exists, a local workspace opens, and the agent still works through the adapter interface |
+| 2 Onboarding and planning | 3–4 | A founder completes onboarding and gets a structured plan with capabilities, required gates and missing items |
+| 3 Library and recipes | 5–7 | Verified components install into the starter app and contract tests run |
+| 4 Verification and readiness | 8–9 | Shipyard can *prove* whether a project is prototype-ready or pilot-ready |
+| 5 Incident and services loop | 10–11 | A test incident becomes a fix task, a verification run, and a service recommendation |
+| 6 Pilot launch | 12+ | 3–5 pilot projects, with component reuse, human hours and readiness measured |
+
 ## Success condition
 
-Five real pilot projects onboarded, three or more shipped pilot-ready, 8–12
-components reused, required tests running automatically, at least one
-production-like incident received and packaged, and service recommendations that
-users understand and accept.
+A non-technical founder completes onboarding without terminal knowledge; at
+least 10 capabilities resolve for a typical SaaS project; 8 verified components
+exist and 5 install with tests; 4 integration recipes including Sentry and
+Stripe; readiness blocks an unsafe production launch; a Sentry test event
+becomes a Shipyard incident that can become an agent fix task; repeated fix
+failure creates a human escalation recommendation; three pilot applications
+reach pilot-ready.
 
 Measured by delivery economics, not feature usage: human hours per project,
-component reuse percentage, failed fix attempts, readiness score at handoff.
-The number that matters is whether Shipyard is becoming a product or drifting
-into an agency.
+component reuse percentage, failed fix attempts, readiness at handoff. Target is
+under 120 human engineering hours per launched application, with 40%+ of common
+functionality installed from the library rather than generated.
+
+**The single number that matters is average human engineering hours per launched
+application.** If it does not fall as the library grows, Shipyard is an agency
+with extra steps, and adding providers, vendors or templates will only add
+surface area without touching the problem.
 
 ## Provenance
 
-This plan was supplied as a document and is recorded here as the plan of record.
-Its terse task list (P6 onward: vendor catalog, recipes, component library,
-verification runner, observability, services) was truncated in transit, but the
-specification body above those headers is complete and is what the work follows.
-Where implementation contradicted the plan, the contradiction and its resolution
-are recorded above rather than resolved silently.
+Supplied as a document and recorded here as the plan of record. Where
+implementation contradicted it, the contradiction and its resolution are written
+down above rather than resolved silently — the three decisions section and the
+`ui_concept` threshold are both examples.
