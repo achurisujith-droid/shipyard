@@ -142,6 +142,33 @@ export function insertIntoSchema(schema: string, fragment: string, componentId: 
 }
 
 /**
+ * Take a component's models back out of the schema.
+ *
+ * Only the block the installer wrote, identified by its marker comment. A model
+ * the user added underneath it stays; so does everything below the closing
+ * marker, which is where their own tables live.
+ *
+ * Removing the declaration does **not** drop the table. That is deliberate and
+ * it is the caller's job to say so — dropping a table takes the data in it, and
+ * uninstalling a component is not a sentence anybody means as "delete my
+ * customers".
+ */
+export function removeFromSchema(schema: string, componentId: string): string {
+  const marker = `// --- ${componentId} ---`;
+  const start = schema.indexOf(marker);
+  if (start === -1) return schema;
+
+  // The block runs to the next component's marker, or to the closing marker.
+  const rest = schema.slice(start + marker.length);
+  const nextComponent = rest.indexOf('// --- ');
+  const closing = rest.indexOf(SCHEMA_CLOSE);
+  const candidates = [nextComponent, closing].filter((index) => index !== -1);
+  const end = candidates.length > 0 ? start + marker.length + Math.min(...candidates) : schema.length;
+
+  return `${schema.slice(0, start).trimEnd()}\n${schema.slice(end)}`;
+}
+
+/**
  * Add variables to `.env.example`, never to `.env`.
  *
  * `.env` is the founder's secret material. Shipyard writes the template that

@@ -42,7 +42,7 @@ macOS and Linux are not built yet.
 | Intake wizard → `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
 | Run, preview, fix loop | Built ([RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md)) |
 | Decision layer: rules, readiness, capabilities, verification, incidents | Built, 190 cases across 6 packages |
-| Component library: 13 components, browse and install | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — 127 engine cases, plus 229 contract tests passing against a real install |
+| Component library: 13 components | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 160 engine cases plus 229 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
 | Guided install and sign-in | Written, never executed — needs a clean VM |
 | macOS, Linux | Not started |

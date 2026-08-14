@@ -9,8 +9,12 @@ import {
   installedIn,
   loadLibrary,
   planInstall,
+  planRemoval,
+  planUpgrade,
   protectedPathsInstruction,
   readInstallRecord,
+  uninstall,
+  upgrade,
   type BrowseOptions,
   type LibraryEntry,
 } from '@shipyard/component-library';
@@ -19,6 +23,10 @@ import type {
   ComponentInstallResult,
   ComponentManifest,
   LibraryComponent,
+  RemovalPlan,
+  RemovalResult,
+  UpgradePlan,
+  UpgradeResult,
 } from '@shipyard/shared';
 
 import type { Metadata } from './metadata';
@@ -123,6 +131,39 @@ export class Library {
       });
     }
 
+    return result;
+  }
+
+  async planRemoval(id: string, projectPath: string): Promise<RemovalPlan> {
+    return planRemoval(await this.load(), id, projectPath);
+  }
+
+  /** Take it out, then correct what the agent has been told it may not touch. */
+  async uninstall(id: string, projectPath: string, projectId?: string): Promise<RemovalResult> {
+    const result = await uninstall(await this.load(), id, projectPath);
+    if (!result.removed) return result;
+
+    await this.refreshAgentInstructions(projectPath);
+    if (projectId && this.options.metadata) {
+      this.options.metadata.markComponentRemoved(projectId, id);
+    }
+    return result;
+  }
+
+  async planUpgrade(id: string, projectPath: string): Promise<UpgradePlan> {
+    return planUpgrade(await this.load(), id, projectPath);
+  }
+
+  async upgrade(id: string, projectPath: string, projectId?: string): Promise<UpgradeResult> {
+    const result = await upgrade(await this.load(), id, projectPath);
+    if (!result.upgraded) return result;
+
+    await this.refreshAgentInstructions(projectPath);
+    if (projectId && this.options.metadata) {
+      const record = await readInstallRecord(projectPath);
+      const installation = record.components.find((entry) => entry.componentId === id);
+      if (installation) this.options.metadata.recordComponentInstall(projectId, installation);
+    }
     return result;
   }
 

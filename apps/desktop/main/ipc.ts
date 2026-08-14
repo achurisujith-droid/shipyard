@@ -160,6 +160,16 @@ export function registerIpc(
       const projectPath = safeProjectPath(str(a, 1));
       return library.install(safeComponentId(a[0]), projectPath, store.findProjectByPath(projectPath)?.id);
     },
+    'library.planRemoval': (a) => library.planRemoval(safeComponentId(a[0]), safeProjectPath(str(a, 1))),
+    'library.uninstall': (a) => {
+      const projectPath = safeProjectPath(str(a, 1));
+      return library.uninstall(safeComponentId(a[0]), projectPath, store.findProjectByPath(projectPath)?.id);
+    },
+    'library.planUpgrade': (a) => library.planUpgrade(safeComponentId(a[0]), safeProjectPath(str(a, 1))),
+    'library.upgrade': (a) => {
+      const projectPath = safeProjectPath(str(a, 1));
+      return library.upgrade(safeComponentId(a[0]), projectPath, store.findProjectByPath(projectPath)?.id);
+    },
     'library.installed': (a) => library.installed(safeProjectPath(str(a, 0))),
     'library.tampering': (a) => library.tampering(safeProjectPath(str(a, 0))),
 

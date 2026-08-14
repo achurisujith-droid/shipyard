@@ -25,6 +25,10 @@ import type {
   ComponentInstallResult,
   ComponentManifest,
   LibraryEntry,
+  RemovalPlan,
+  RemovalResult,
+  UpgradePlan,
+  UpgradeResult,
 } from './components';
 
 /** Channel names. Kept in one place so main and preload cannot drift. */
@@ -258,6 +262,20 @@ export interface ShipyardBridge {
     plan(id: string, projectPath: string): Promise<ComponentInstallPlan>;
     /** Do it. Refuses rather than overwriting anything the user already has. */
     install(id: string, projectPath: string): Promise<ComponentInstallResult>;
+    /**
+     * What taking it back out would do — including what it deliberately will
+     * not undo: the database tables and their data stay, and so do the npm
+     * packages, because something else may have started using them.
+     */
+    planRemoval(id: string, projectPath: string): Promise<RemovalPlan>;
+    uninstall(id: string, projectPath: string): Promise<RemovalResult>;
+    /**
+     * What moving to a newer version would do. Refuses when it would overwrite
+     * a file somebody has edited, and names the files rather than asking them
+     * to guess.
+     */
+    planUpgrade(id: string, projectPath: string): Promise<UpgradePlan>;
+    upgrade(id: string, projectPath: string): Promise<UpgradeResult>;
     /** Component id → installed version. */
     installed(projectPath: string): Promise<Record<string, string>>;
     /**

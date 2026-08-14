@@ -273,6 +273,68 @@ export interface ComponentInstallPlan {
   installable: boolean;
 }
 
+/**
+ * What taking a component back out would do.
+ *
+ * Two things are deliberately not undone, and both are named here rather than
+ * left for someone to discover: the database tables stay (dropping one takes
+ * the data in it), and the npm packages stay (something else may have started
+ * using them).
+ */
+export interface RemovalPlan {
+  componentId: string;
+  version: string;
+  removes: string[];
+  /** Edited since installation, so kept rather than deleted. */
+  modified: string[];
+  /** Tables whose declaration goes and whose data does not. */
+  orphanedTables: string[];
+  keptDependencies: string[];
+  problems: string[];
+  removable: boolean;
+}
+
+export interface RemovalResult {
+  componentId: string;
+  removed: boolean;
+  filesRemoved: string[];
+  filesKept: string[];
+  /** Things the user should know, in their words. */
+  notes: string[];
+  errors: string[];
+}
+
+/** What moving an installed component to a newer version would do. */
+export interface UpgradePlan {
+  componentId: string;
+  from: string;
+  to: string;
+  replaces: string[];
+  adds: string[];
+  drops: string[];
+  /** Customised examples, left exactly as they are. */
+  leaves: string[];
+  addsTables: string[];
+  orphanedTables: string[];
+  /**
+   * Edited files standing in the way. An upgrade that silently overwrote one
+   * would take away work somebody meant to do, weeks before they noticed.
+   */
+  blockedBy: string[];
+  problems: string[];
+  upgradable: boolean;
+}
+
+export interface UpgradeResult {
+  componentId: string;
+  from: string;
+  to: string;
+  upgraded: boolean;
+  filesWritten: string[];
+  notes: string[];
+  errors: string[];
+}
+
 /** The outcome of applying a plan. */
 export interface ComponentInstallResult {
   componentId: string;

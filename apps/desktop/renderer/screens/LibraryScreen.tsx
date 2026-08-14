@@ -4,6 +4,10 @@ import type {
   ComponentInstallPlan,
   ComponentInstallResult,
   LibraryEntry,
+  RemovalPlan,
+  RemovalResult,
+  UpgradePlan,
+  UpgradeResult,
 } from '@shipyard/shared';
 
 interface Props {
@@ -34,7 +38,12 @@ export function LibraryScreen({ projectPath, onBack }: Props): JSX.Element {
   const [plan, setPlan] = useState<ComponentInstallPlan | null>(null);
   const [planning, setPlanning] = useState(false);
   const [installing, setInstalling] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [done, setDone] = useState<ComponentInstallResult | null>(null);
+  const [removal, setRemoval] = useState<RemovalPlan | null>(null);
+  const [removed, setRemoved] = useState<RemovalResult | null>(null);
+  const [upgradePlan, setUpgradePlan] = useState<UpgradePlan | null>(null);
+  const [upgraded, setUpgraded] = useState<UpgradeResult | null>(null);
   const [error, setError] = useState('');
 
   const refresh = useCallback(async (): Promise<void> => {
@@ -55,14 +64,54 @@ export function LibraryScreen({ projectPath, onBack }: Props): JSX.Element {
     setSelected(entry);
     setDone(null);
     setPlan(null);
-    if (entry.installed) return;
+    setRemoval(null);
+    setUpgradePlan(null);
     setPlanning(true);
     try {
-      setPlan(await window.shipyard.library.plan(entry.manifest.id, projectPath));
+      if (entry.installed) {
+        // Both are worked out up front, because the two questions somebody has
+        // about something already installed are "can I update it?" and "can I
+        // get rid of it?", and both answers can be no.
+        const [removal, update] = await Promise.all([
+          window.shipyard.library.planRemoval(entry.manifest.id, projectPath),
+          window.shipyard.library.planUpgrade(entry.manifest.id, projectPath),
+        ]);
+        setRemoval(removal);
+        setUpgradePlan(update);
+      } else {
+        setPlan(await window.shipyard.library.plan(entry.manifest.id, projectPath));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setPlanning(false);
+    }
+  };
+
+  const remove = async (): Promise<void> => {
+    if (!selected || !removal?.removable || busy) return;
+    setBusy(true);
+    try {
+      setRemoved(await window.shipyard.library.uninstall(selected.manifest.id, projectPath));
+      await refresh();
+      setSelected(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const update = async (): Promise<void> => {
+    if (!selected || !upgradePlan?.upgradable || busy) return;
+    setBusy(true);
+    try {
+      setUpgraded(await window.shipyard.library.upgrade(selected.manifest.id, projectPath));
+      await refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -148,8 +197,15 @@ export function LibraryScreen({ projectPath, onBack }: Props): JSX.Element {
               plan={plan}
               planning={planning}
               installing={installing}
+              busy={busy}
               done={done}
+              removal={removal}
+              removed={removed}
+              upgradePlan={upgradePlan}
+              upgraded={upgraded}
               onConfirm={() => void confirm()}
+              onRemove={() => void remove()}
+              onUpdate={() => void update()}
             />
           )}
         </section>
@@ -163,15 +219,29 @@ function Detail({
   plan,
   planning,
   installing,
+  busy,
   done,
+  removal,
+  removed,
+  upgradePlan,
+  upgraded,
   onConfirm,
+  onRemove,
+  onUpdate,
 }: {
   entry: LibraryEntry;
   plan: ComponentInstallPlan | null;
   planning: boolean;
   installing: boolean;
+  busy: boolean;
   done: ComponentInstallResult | null;
+  removal: RemovalPlan | null;
+  removed: RemovalResult | null;
+  upgradePlan: UpgradePlan | null;
+  upgraded: UpgradeResult | null;
   onConfirm: () => void;
+  onRemove: () => void;
+  onUpdate: () => void;
 }): JSX.Element {
   const { manifest } = entry;
   const blocking = plan?.conflicts.filter((conflict) => conflict.blocking) ?? [];
@@ -217,7 +287,16 @@ function Detail({
       {done ? (
         <Outcome result={done} />
       ) : entry.installed ? (
-        <p className="library-note">This is already part of your project.</p>
+        <Installed
+          removal={removal}
+          removed={removed}
+          upgradePlan={upgradePlan}
+          upgraded={upgraded}
+          planning={planning}
+          busy={busy}
+          onRemove={onRemove}
+          onUpdate={onUpdate}
+        />
       ) : planning ? (
         <p className="library-note">Working out what this would change…</p>
       ) : plan ? (
@@ -288,6 +367,145 @@ function Detail({
             {installing ? 'Adding…' : `Add ${manifest.name.toLowerCase()} to my app`}
           </button>
         </>
+      ) : null}
+    </>
+  );
+}
+
+/**
+ * Something already in the project: can it be updated, and can it be removed?
+ *
+ * Both answers can be no, and the reason matters more than the button. "You
+ * have changed these files, so updating would overwrite your work" is a
+ * sentence somebody can act on; a greyed-out button is not.
+ */
+function Installed({
+  removal,
+  removed,
+  upgradePlan,
+  upgraded,
+  planning,
+  busy,
+  onRemove,
+  onUpdate,
+}: {
+  removal: RemovalPlan | null;
+  removed: RemovalResult | null;
+  upgradePlan: UpgradePlan | null;
+  upgraded: UpgradeResult | null;
+  planning: boolean;
+  busy: boolean;
+  onRemove: () => void;
+  onUpdate: () => void;
+}): JSX.Element {
+  if (removed?.removed) {
+    return (
+      <section className="library-done">
+        <h3>Taken out</h3>
+        <p>
+          {removed.filesRemoved.length} file{removed.filesRemoved.length === 1 ? '' : 's'} removed.
+        </p>
+        {removed.notes.length ? (
+          <ul>
+            {removed.notes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+    );
+  }
+
+  if (upgraded?.upgraded) {
+    return (
+      <section className="library-done">
+        <h3>Updated to {upgraded.to}</h3>
+        {upgraded.notes.length ? (
+          <ul>
+            {upgraded.notes.map((note) => (
+              <li key={note}>{note}</li>
+            ))}
+          </ul>
+        ) : null}
+      </section>
+    );
+  }
+
+  if (planning) return <p className="library-note">Checking what can be done with it…</p>;
+
+  return (
+    <>
+      <p className="library-note">This is already part of your project.</p>
+
+      {upgradePlan && upgradePlan.upgradable ? (
+        <section className="library-change">
+          <h3>A newer version is available</h3>
+          <p>
+            You have {upgradePlan.from}; {upgradePlan.to} is available.{' '}
+            {upgradePlan.replaces.length} file
+            {upgradePlan.replaces.length === 1 ? '' : 's'} would be replaced.
+          </p>
+          {upgradePlan.leaves.length ? (
+            <p>
+              {upgradePlan.leaves.length} file
+              {upgradePlan.leaves.length === 1 ? ' you customised would be left as it is' : 's you customised would be left as they are'}.
+            </p>
+          ) : null}
+          <button type="button" className="btn btn-primary" disabled={busy} onClick={onUpdate}>
+            {busy ? 'Updating…' : 'Update it'}
+          </button>
+        </section>
+      ) : upgradePlan?.blockedBy.length ? (
+        <section className="library-refusal">
+          <h3>It cannot be updated right now</h3>
+          <p>
+            You have changed {upgradePlan.blockedBy.length} of its file
+            {upgradePlan.blockedBy.length === 1 ? '' : 's'}, and updating would overwrite that work:
+          </p>
+          <ul>
+            {upgradePlan.blockedBy.map((file) => (
+              <li key={file}>
+                <code>{file}</code>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {removal?.removable ? (
+        <section className="library-remove">
+          <h3>Taking it out</h3>
+          <p>
+            {removal.removes.length} file{removal.removes.length === 1 ? '' : 's'} would be deleted.
+          </p>
+          {removal.orphanedTables.length ? (
+            <p>
+              Your {removal.orphanedTables.join(', ')} table
+              {removal.orphanedTables.length === 1 ? '' : 's'} and the information in{' '}
+              {removal.orphanedTables.length === 1 ? 'it' : 'them'} would be left exactly as{' '}
+              {removal.orphanedTables.length === 1 ? 'it is' : 'they are'}. Nothing here deletes your
+              data.
+            </p>
+          ) : null}
+          {removal.modified.length ? (
+            <p>
+              {removal.modified.length} file
+              {removal.modified.length === 1 ? ' you changed would be kept' : 's you changed would be kept'}.
+            </p>
+          ) : null}
+          <button type="button" className="btn btn-quiet" disabled={busy} onClick={onRemove}>
+            {busy ? 'Removing…' : 'Take it out'}
+          </button>
+        </section>
+      ) : removal?.problems.length ? (
+        <section className="library-refusal">
+          <h3>It cannot be taken out</h3>
+          <ul>
+            {removal.problems.map((problem) => (
+              <li key={problem}>{problem}</li>
+            ))}
+          </ul>
+        </section>
       ) : null}
     </>
   );

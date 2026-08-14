@@ -2016,3 +2016,26 @@ p {
 .library-detail > .btn-primary {
   margin-top: var(--space-5);
 }
+
+/* Taking something out. Quieter than installing, because it is the reversible
+ * half of a decision and should not look like the main action. */
+.library-remove {
+  background: var(--surface-2);
+  border-radius: var(--radius);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+.library-remove h3 {
+  margin-top: 0;
+}
+
+.library-remove p {
+  color: var(--muted);
+}
+
+.library-refusal code,
+.library-remove code {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}

@@ -1,6 +1,6 @@
 # The component library
 
-**Status:** built · **Last verified:** 2026-08-14 · 13 components · 127 engine
+**Status:** built · **Last verified:** 2026-08-14 · 13 components · 160 engine
 cases · 229 contract tests passing against a real install
 
 The claim Shipyard makes is that a founder gets further by installing proven
@@ -196,12 +196,43 @@ Four bugs, each found by a test rather than by reading:
 The first is why the cross-check exists. The other three are the kind of thing
 that ships silently, and each is now a named test.
 
+## Taking one out, and moving one on
+
+Both exist, and both are shaped by the same question: what happens to work
+somebody has done since the install.
+
+**Uninstall** deletes the files it wrote, takes the models back out of the
+schema, and frees the protected paths so the component can be installed again.
+It refuses when another installed component needs the one being removed —
+letting the build break afterwards would be a worse answer than refusing now.
+
+Two things it deliberately does not undo, and says so rather than doing quietly:
+
+- **The database tables stay.** Removing a model from the schema does not drop
+  the table, and nothing here writes a migration that would. "Uninstall the
+  audit log component" is not a sentence anybody means as "delete the record of
+  everything that has happened."
+- **The npm packages stay.** Something else may have started using one.
+
+A file edited since it was installed is **kept, not deleted**. Whatever somebody
+changed there, they meant to.
+
+**Upgrade** replaces the implementation and the tests, leaves `example` files
+alone — they were handed over on purpose — and re-hashes the protected paths so
+the next tamper check compares against the right version.
+
+Its central rule is that it **refuses to overwrite a file you have edited**, and
+names the files. An upgrade that silently reverted a change is worse than no
+upgrade: nobody reads the diff, they find out weeks later when behaviour they
+added is gone, and they do not connect it to a button that said "update".
+Downgrades are refused outright — an older version may not understand tables the
+newer one created.
+
+Both are two-step like install, both roll back completely on failure, and both
+are reachable from the library screen.
+
 ## What is not built
 
-- **No uninstall.** The install record lists every file written, so it is
-  tractable; nothing has been written.
-- **No upgrades.** Installing a newer version over an older one is refused
-  rather than attempted.
 - **The starter template has never been deployed.** It builds and typechecks;
   `next build` against a real database and a real host is untested.
 - **The database-backed contract tests are opt-in** (`CONTRACT_TEST_DATABASE=1`)

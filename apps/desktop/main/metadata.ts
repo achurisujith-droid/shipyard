@@ -531,6 +531,20 @@ export class Metadata {
     }));
   }
 
+  /**
+   * Mark a component as taken back out.
+   *
+   * Marked rather than deleted, unlike the project's own record. Shipyard's
+   * copy exists to answer "how much came from the library", and a component
+   * that was installed and later removed is part of that story — deleting the
+   * row would make an abandoned component look like one that was never tried.
+   */
+  markComponentRemoved(projectId: string, componentId: string): void {
+    this.db
+      .prepare("UPDATE installed_components SET status = 'removed' WHERE project_id = ? AND component_id = ?")
+      .run(projectId, componentId);
+  }
+
   /** Attach the verification run that judged a component's contract. */
   recordContractRun(projectId: string, componentId: string, runId: string, passed: boolean): void {
     this.db

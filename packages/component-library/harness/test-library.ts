@@ -32,9 +32,14 @@ import {
   mergeDependency,
   mergeEnvExample,
   planInstall,
+  planRemoval,
+  planUpgrade,
   protectedPathsInstruction,
   protectedPathsOf,
   readInstallRecord,
+  removeFromSchema,
+  uninstall,
+  upgrade,
 } from '../src/index';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -562,6 +567,136 @@ async function main(): Promise<void> {
     'and says who owns it',
     ownedPlan.conflicts.some((conflict) => /belongs to/.test(conflict.message)),
   );
+
+  // ======================================================================
+  // Taking one back out
+  // ======================================================================
+  const removalProject = await freshProject();
+  await install(library, 'audit_logging', removalProject);
+
+  const dependentRemoval = await planRemoval(library, 'organization_tenancy', removalProject);
+  check('removing something another component needs is refused', !dependentRemoval.removable);
+  check(
+    'and names what needs it',
+    dependentRemoval.problems.some((problem) => /needs this and is also installed/.test(problem)),
+    JSON.stringify(dependentRemoval.problems),
+  );
+
+  const removalPlan = await planRemoval(library, 'audit_logging', removalProject);
+  check('a component nothing depends on can be removed', removalPlan.removable);
+  check('the plan lists the files that would go', removalPlan.removes.length > 3);
+  check(
+    'and warns that the tables stay',
+    removalPlan.orphanedTables.includes('AuditEvent'),
+    JSON.stringify(removalPlan.orphanedTables),
+  );
+
+  const removed = await uninstall(library, 'audit_logging', removalProject);
+  check('the removal succeeds', removed.removed, removed.errors.join('; '));
+  check('the files are gone', removed.filesRemoved.length > 3);
+  check(
+    'and the schema no longer declares its tables',
+    !declaredModels(await readFile(path.join(removalProject, 'prisma', 'schema.prisma'), 'utf8')).has('AuditEvent'),
+  );
+  check(
+    'while the tables it left behind are called out',
+    removed.notes.some((note) => /still exist in your database/.test(note)),
+    removed.notes.join(' | '),
+  );
+  check(
+    'the packages are left alone, and that is said',
+    removed.notes.some((note) => /left in place/.test(note)) || removalPlan.keptDependencies.length === 0,
+  );
+  check('it is no longer listed as installed', !(await installedIn(removalProject))['audit_logging']);
+  check(
+    'and what it depended on is still there',
+    Boolean((await installedIn(removalProject))['organization_tenancy']),
+  );
+  check(
+    'its paths are free again, so it can be reinstalled',
+    (await planInstall(library, 'audit_logging', removalProject)).installable,
+  );
+
+  // A file somebody edited is theirs now, whatever it started as.
+  const editedProject = await freshProject();
+  await install(library, 'audit_logging', editedProject);
+  const auditFile = path.join(editedProject, 'src', 'components', 'audit_logging', 'audit.ts');
+  await writeFile(auditFile, `${await readFile(auditFile, 'utf8')}\n// mine now\n`, 'utf8');
+  const editedRemoval = await uninstall(library, 'audit_logging', editedProject);
+  check('an edited file is kept rather than deleted', editedRemoval.filesKept.includes('src/components/audit_logging/audit.ts'));
+  check('and the user is told', editedRemoval.notes.some((note) => /left alone/.test(note)));
+  check('the file is still there', await readFile(auditFile, 'utf8').then(() => true, () => false));
+
+  // ======================================================================
+  // Moving to a newer version
+  // ======================================================================
+  const upgradeProject = await freshProject();
+  await install(library, 'rbac', upgradeProject);
+
+  const sameVersion = await planUpgrade(library, 'rbac', upgradeProject);
+  check('upgrading to the version you already have is refused', !sameVersion.upgradable);
+  check('and says so plainly', /already have the newest/.test(sameVersion.problems[0] ?? ''));
+
+  const notInstalled = await planUpgrade(library, 'stripe_subscription_billing', upgradeProject);
+  check('upgrading something you never installed is refused', !notInstalled.upgradable);
+
+  // Pretend an older version is installed, so the real path can be exercised.
+  const pretendOld = async (project: string, id: string, version: string): Promise<void> => {
+    const file = path.join(project, 'shipyard.components.json');
+    const contents = JSON.parse(await readFile(file, 'utf8')) as {
+      version: 1;
+      components: { componentId: string; version: string }[];
+    };
+    for (const entry of contents.components) if (entry.componentId === id) entry.version = version;
+    await writeFile(file, JSON.stringify(contents, null, 2), 'utf8');
+  };
+
+  await pretendOld(upgradeProject, 'rbac', '0.9.0');
+  const realUpgrade = await planUpgrade(library, 'rbac', upgradeProject);
+  check('an older version can be updated', realUpgrade.upgradable, JSON.stringify(realUpgrade.problems));
+  check('the plan says where it is going', realUpgrade.from === '0.9.0' && realUpgrade.to === '1.0.0');
+  check('and which files it would replace', realUpgrade.replaces.length > 0);
+
+  const upgraded = await upgrade(library, 'rbac', upgradeProject);
+  check('the upgrade succeeds', upgraded.upgraded, upgraded.errors.join('; '));
+  check('the recorded version moves', (await installedIn(upgradeProject))['rbac'] === '1.0.0');
+  check(
+    'and the tamper check is quiet afterwards',
+    (await checkProtectedPaths(upgradeProject)).length === 0,
+    JSON.stringify(await checkProtectedPaths(upgradeProject)),
+  );
+
+  // The case this whole operation is judged on.
+  const editedUpgrade = await freshProject();
+  await install(library, 'rbac', editedUpgrade);
+  await pretendOld(editedUpgrade, 'rbac', '0.9.0');
+  const permissionsFile = path.join(editedUpgrade, 'src', 'components', 'rbac', 'permissions.ts');
+  const theirVersion = `${await readFile(permissionsFile, 'utf8')}\n// our finance team can read the audit log\n`;
+  await writeFile(permissionsFile, theirVersion, 'utf8');
+
+  const blocked = await planUpgrade(library, 'rbac', editedUpgrade);
+  check('an upgrade that would overwrite an edit is refused', !blocked.upgradable);
+  check('and names the file', blocked.blockedBy.includes('src/components/rbac/permissions.ts'));
+  const blockedResult = await upgrade(library, 'rbac', editedUpgrade);
+  check('applying it anyway does nothing', !blockedResult.upgraded);
+  check(
+    'and the edit survives untouched',
+    (await readFile(permissionsFile, 'utf8')) === theirVersion,
+  );
+
+  // A file handed over on purpose is a different matter.
+  const customisedExample = await freshProject();
+  await install(library, 'transactional_email', customisedExample);
+  await pretendOld(customisedExample, 'transactional_email', '0.9.0');
+  const templatesFile = path.join(customisedExample, 'src', 'components', 'transactional_email', 'templates.ts');
+  const customised = '// entirely rewritten by the founder\nexport const mine = true;\n';
+  await writeFile(templatesFile, customised, 'utf8');
+  const examplePlan = await planUpgrade(library, 'transactional_email', customisedExample);
+  check('a customised example does not block the upgrade', examplePlan.upgradable, JSON.stringify(examplePlan.problems));
+  check('it is listed as left alone', examplePlan.leaves.includes('src/components/transactional_email/templates.ts'));
+  const exampleUpgrade = await upgrade(library, 'transactional_email', customisedExample);
+  check('and the upgrade goes through', exampleUpgrade.upgraded, exampleUpgrade.errors.join('; '));
+  check('with their version of the example intact', (await readFile(templatesFile, 'utf8')) === customised);
 
   // ======================================================================
   // The merge helpers, on their own

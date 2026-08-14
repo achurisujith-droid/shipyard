@@ -108,7 +108,7 @@ export async function planInstall(
     conflicts.push({
       kind: 'already_installed',
       message: newer
-        ? `${target.manifest.name} is already installed at ${installedVersion}. Upgrading to ${target.manifest.version} is not built yet.`
+        ? `${target.manifest.name} is already installed, at version ${installedVersion}. Version ${target.manifest.version} is available — update it rather than installing it again.`
         : `${target.manifest.name} is already installed.`,
       blocking: true,
     });
