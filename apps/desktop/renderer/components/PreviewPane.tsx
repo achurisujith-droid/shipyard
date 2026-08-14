@@ -20,6 +20,11 @@ interface Props {
 export function PreviewPane({ projectPath }: Props): JSX.Element {
   const [info, setInfo] = useState<RunnerInfo | null>(null);
   const [status, setStatus] = useState<RunnerStatus>({ state: 'idle' });
+  /**
+   * The script the user picked in this session, before they pressed Run. Null
+   * means "whatever the project says", which is what `info.script` already is.
+   */
+  const [chosen, setChosen] = useState<string | null>(null);
   const webviewRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
@@ -27,6 +32,14 @@ export function PreviewPane({ projectPath }: Props): JSX.Element {
     void window.shipyard.runner.status().then(setStatus);
     return window.shipyard.on('runner:status', setStatus);
   }, [projectPath]);
+
+  // A different project has different scripts; carrying a name across would
+  // silently run the wrong thing or nothing at all.
+  useEffect(() => setChosen(null), [projectPath]);
+
+  const run = (): void => {
+    void window.shipyard.runner.start(projectPath, chosen ?? undefined);
+  };
 
   // Re-check whether the project is runnable when Claude finishes a turn: the
   // whole point is that it did not exist a minute ago and now it does.
@@ -91,9 +104,33 @@ export function PreviewPane({ projectPath }: Props): JSX.Element {
 
         {status.url && <code className="preview-url">{status.url}</code>}
 
+        {/* Only when there is a real choice. One script is not a decision, and
+            showing a menu of one teaches people to read menus that say nothing. */}
+        {(status.state === 'idle' || status.state === 'stopped' || status.state === 'failed') &&
+          (info?.scripts?.length ?? 0) > 1 && (
+            <label className="preview-script">
+              <span>Start with</span>
+              <select
+                value={chosen ?? info?.script ?? ''}
+                onChange={(event) => setChosen(event.target.value)}
+              >
+                {info?.scripts?.map((script) => (
+                  <option key={script.name} value={script.name}>
+                    {script.name} — {script.command}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
+
         <div className="preview-actions">
           {status.state === 'running' && (
             <>
+              {/* Says what Shipyard is doing on their behalf, so a restart they
+                  did not ask for is not a mystery when it happens. */}
+              {status.watching && (
+                <span className="preview-watching">Restarts when your files change</span>
+              )}
               <button className="btn btn-quiet btn-sm" onClick={reload}>
                 Reload
               </button>
@@ -122,10 +159,7 @@ export function PreviewPane({ projectPath }: Props): JSX.Element {
           )}
           {(status.state === 'idle' || status.state === 'stopped' || status.state === 'failed') &&
             info?.canRun && (
-              <button
-                className="btn btn-sm"
-                onClick={() => void window.shipyard.runner.start(projectPath)}
-              >
+              <button className="btn btn-sm" onClick={run}>
                 {info.needsInstall || info.needsDatabase ? 'Set up and run' : 'Run my app'}
               </button>
             )}
@@ -173,10 +207,7 @@ export function PreviewPane({ projectPath }: Props): JSX.Element {
               <>
                 <p className="muted">{info?.canRun ? 'Your app isn’t running.' : info?.reason}</p>
                 {info?.canRun && (
-                  <button
-                    className="btn"
-                    onClick={() => void window.shipyard.runner.start(projectPath)}
-                  >
+                  <button className="btn" onClick={run}>
                     Run my app
                   </button>
                 )}

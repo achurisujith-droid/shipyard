@@ -54,7 +54,7 @@ const api: ShipyardApi = {
   },
   runner: {
     inspect: (projectPath) => call('runner.inspect', projectPath),
-    start: (projectPath) => call('runner.start', projectPath),
+    start: (projectPath, script) => call('runner.start', projectPath, script),
     stop: () => call('runner.stop'),
     status: () => call('runner.status'),
     reportBrowserProblem: (message, detail, location) =>

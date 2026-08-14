@@ -22,6 +22,7 @@
     "test": "tsx scripts/test-runner.mts",
     "toolchain": "node scripts/fetch-toolchain.mjs",
     "test:stack": "tsx scripts/test-stack.mts",
+    "test:restart": "tsx scripts/test-restart.mts",
     "try": "tsx scripts/try-project.mts",
     "check:contrast": "node scripts/check-contrast.mjs",
     "test:intake": "tsx scripts/test-intake.mts"

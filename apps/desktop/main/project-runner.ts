@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { watch, type FSWatcher } from 'node:fs';
 import { access, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
@@ -7,6 +8,7 @@ import * as pty from 'node-pty';
 import { buildSessionEnv } from '@shipyard/cli-bridge';
 import type {
   DetectedProblem,
+  RunnableScript,
   RunnerInfo,
   RunnerStatus,
   ShipyardEventName,
@@ -16,6 +18,7 @@ import type {
 import type { PostgresManager } from './postgres';
 import { detectNeeds } from './stack';
 import { startStaticServer, type StaticServer } from './static-server';
+import type { Store } from './store';
 import type { Toolchain } from './toolchain';
 
 type Emit = <K extends ShipyardEventName>(event: K, payload: ShipyardEvents[K]) => void;
@@ -49,6 +52,74 @@ const NOT_A_PROBLEM_RE =
 const LOCATION_RE = /((?:[\w.-]+[\\/])*[\w.-]+\.[a-z]{1,4}):(\d+)(?::(\d+))?/i;
 
 /**
+ * Scripts that can start a project, in the order we would try them.
+ *
+ * `dev` first because that is what every modern scaffold calls its watching
+ * server. `start` is ambiguous — sometimes the dev server, sometimes a
+ * production build — which is precisely why the user can override the pick.
+ */
+const START_SCRIPTS = ['dev', 'start', 'serve', 'develop', 'dev:server'] as const;
+
+/**
+ * Tools whose dev server watches the project by definition.
+ *
+ * Matched against what the script actually runs, not its name: `"dev": "vite"`
+ * and `"start": "vite"` behave identically and only one of them is called dev.
+ */
+const SELF_RELOADING_TOOLS =
+  /(?:^|[\s&|;(])(?:vite|next|nuxt|astro|remix|parcel|rsbuild|nodemon|react-scripts|svelte-kit|encore|wrangler)(?=\s|$|["'])/i;
+
+/** The same thing spelled as a flag or a subcommand rather than a binary. */
+const SELF_RELOADING_FLAGS =
+  /--watch\b|--hot\b|\b(?:tsx|tsc|node|bun|deno|nest|nodemon)\s+(?:--)?watch\b|\bng\s+serve\b|\bvue-cli-service\s+serve\b|\bwebpack(?:-dev-server\b|\s+serve\b)/i;
+
+/**
+ * Does this script restart or hot-reload itself?
+ *
+ * Erring towards "no" costs the user a manual reload. Erring towards "yes" when
+ * it is false leaves them editing a file and seeing nothing change, which is
+ * the failure this whole feature exists to remove — so unknown scripts are
+ * treated as needing our help.
+ */
+export function selfReloading(command: string): boolean {
+  return SELF_RELOADING_TOOLS.test(command) || SELF_RELOADING_FLAGS.test(command);
+}
+
+/**
+ * Directories a file watcher must never descend into.
+ *
+ * `node_modules` alone is tens of thousands of files, and build output changes
+ * as a *result* of a restart — watching it would restart the app forever.
+ */
+const UNWATCHED = new Set([
+  'node_modules',
+  '.git',
+  'dist',
+  'build',
+  'out',
+  '.next',
+  '.nuxt',
+  '.svelte-kit',
+  '.astro',
+  '.turbo',
+  '.cache',
+  '.parcel-cache',
+  'coverage',
+  '.vite',
+]);
+
+/** Files whose changes are noise: logs, editor swap files, lockfile churn. */
+const UNWATCHED_FILE_RE = /(^|[\\/])(\.DS_Store|Thumbs\.db|.*\.log|.*~|\.#.*|.*\.swp|.*\.tmp)$/i;
+
+/**
+ * How long to wait after a change before restarting.
+ *
+ * Claude writes several files in a burst, and each one is its own event. A
+ * restart per file would thrash the app and the database beneath it.
+ */
+const RESTART_DEBOUNCE_MS = 700;
+
+/**
  * Runs the user's project and watches it break.
  *
  * This is the local half of the vibe-coding loop: start the dev server, learn
@@ -69,10 +140,21 @@ export class ProjectRunner {
   /** DATABASE_URL for the project currently running, when it needed one. */
   private databaseUrl: string | null = null;
 
+  /** Watches the project when the dev server cannot watch itself. */
+  private watcher: FSWatcher | null = null;
+  private restartTimer: NodeJS.Timeout | null = null;
+  /** The script this run started from, so a restart repeats the same one. */
+  private script: string | null = null;
+
   constructor(
     private readonly emit: Emit,
     private readonly toolchain: Toolchain,
     private readonly postgres: PostgresManager,
+    /**
+     * Optional so the test harnesses can run the real runner without a
+     * database file. Without it, a script choice simply is not remembered.
+     */
+    private readonly store?: Pick<Store, 'getSetting' | 'setSetting'>,
   ) {}
 
   /**
@@ -115,8 +197,15 @@ export class ProjectRunner {
       return { canRun: false, reason: "This project's package.json could not be read." };
     }
 
-    const script = ['dev', 'start', 'serve'].find((name) => typeof scripts[name] === 'string');
-    if (!script) {
+    const runnable: RunnableScript[] = START_SCRIPTS.filter(
+      (name) => typeof scripts[name] === 'string',
+    ).map((name) => ({
+      name,
+      command: scripts[name] as string,
+      selfReloading: selfReloading(scripts[name] as string),
+    }));
+
+    if (runnable.length === 0) {
       if (await exists(path.join(projectPath, 'index.html'))) {
         return { canRun: true, command: 'Preview index.html' };
       }
@@ -126,16 +215,30 @@ export class ProjectRunner {
       };
     }
 
+    // A choice the user made once outranks our ordering, but only while that
+    // script still exists \u2014 projects get rewritten, and a remembered name that
+    // has since been deleted must not strand the Run button.
+    const remembered = this.preferredScript(projectPath);
+    const chosen =
+      runnable.find((s) => s.name === remembered) ?? (runnable[0] as RunnableScript);
+
     // A freshly scaffolded project has no node_modules, and `npm run dev` would
     // fail immediately with a message a beginner cannot act on.
     const needsInstall = !(await exists(path.join(projectPath, 'node_modules')));
     const needs = await detectNeeds(projectPath);
     return {
       canRun: true,
-      command: `npm run ${script}`,
+      command: `npm run ${chosen.name}`,
+      script: chosen.name,
+      scripts: runnable,
       needsInstall,
       needsDatabase: needs.database,
     };
+  }
+
+  /** The script this user last chose for this project, if they chose one. */
+  private preferredScript(projectPath: string): string | undefined {
+    return this.store?.getSetting(scriptKey(projectPath));
   }
 
   current(): RunnerStatus {
@@ -154,8 +257,12 @@ export class ProjectRunner {
     return this.status.state === 'stopped';
   }
 
-  async start(projectPath: string): Promise<void> {
+  async start(projectPath: string, script?: string): Promise<void> {
     this.stop();
+
+    // Remember the choice before inspecting, so inspect() picks it up and the
+    // command, the status and the restart all agree on one script.
+    if (script) this.store?.setSetting(scriptKey(projectPath), script);
 
     const info = await this.inspect(projectPath);
     if (!info.canRun || !info.command) {
@@ -164,6 +271,7 @@ export class ProjectRunner {
     }
 
     this.cwd = projectPath;
+    this.script = info.script ?? null;
     this.buffer = '';
     this.seen.clear();
 
@@ -207,8 +315,96 @@ export class ProjectRunner {
 
     if (!(await this.prepareDatabase(projectPath))) return;
 
-    this.setStatus({ state: 'starting', command: info.command });
+    this.setStatus({
+      state: 'starting',
+      command: info.command,
+      ...(info.script ? { script: info.script } : {}),
+    });
     this.spawnDev(projectPath, info.command);
+
+    // A plain `node server.js` never notices that Claude rewrote it. Watching
+    // is the difference between "I changed it and nothing happened" and the
+    // app simply being up to date.
+    const chosen = info.scripts?.find((s) => s.name === info.script);
+    if (chosen && !chosen.selfReloading) this.watchForChanges(projectPath);
+  }
+
+  /**
+   * Restart the dev server when a file in the project changes.
+   *
+   * Only for scripts that do not watch themselves — see `selfReloading`. The
+   * database is left running: it is the same data either way, and re-creating
+   * a cluster on every edit would add five seconds to a loop that has to feel
+   * immediate.
+   */
+  private watchForChanges(projectPath: string): void {
+    this.unwatch();
+    try {
+      this.watcher = watch(projectPath, { recursive: true }, (_event, filename) => {
+        if (!filename || !this.isInteresting(filename.toString())) return;
+        if (this.restartTimer) clearTimeout(this.restartTimer);
+        this.restartTimer = setTimeout(() => {
+          this.restartTimer = null;
+          void this.restartForChange(projectPath);
+        }, RESTART_DEBOUNCE_MS);
+      });
+      this.setStatus({ ...this.status, watching: true });
+    } catch {
+      // Recursive watching is unsupported on some Linux filesystems, and a
+      // project on a network share can refuse a watch outright. Neither is
+      // worth failing a run over: the app is up, it just will not restart
+      // itself.
+      this.watcher = null;
+    }
+  }
+
+  /** Is this path worth restarting for? */
+  private isInteresting(filename: string): boolean {
+    if (UNWATCHED_FILE_RE.test(filename)) return false;
+    return !filename.split(/[\\/]/).some((segment) => UNWATCHED.has(segment));
+  }
+
+  private async restartForChange(projectPath: string): Promise<void> {
+    // Only restart something that is actually up. A change arriving while the
+    // user is installing, or after they pressed Stop, is not ours to act on.
+    if (this.status.state !== 'running' && this.status.state !== 'starting') return;
+    if (this.cwd !== projectPath || !this.script) return;
+
+    this.emit('runner:log', {
+      chunk: '\r\nShipyard: your files changed, restarting the app…\r\n',
+    });
+
+    const child = this.child;
+    this.child = null;
+    // Wait for it to actually go. A dev server holds its port until the
+    // process exits, and spawning the replacement first means the new one dies
+    // with EADDRINUSE — which reads, to the user, as the restart breaking their
+    // app.
+    if (child) await killAndWait(child);
+
+    // Stop() during the wait, or a second change that already queued another
+    // restart: either way this run is stale and must not spawn anything.
+    if (this.cwd !== projectPath || this.restartTimer !== null || this.cancelled()) return;
+
+    this.buffer = '';
+    // The URL is re-learned from the new process's output. Keeping the old one
+    // would point the preview at a port nothing is listening on yet.
+    this.setStatus({
+      state: 'starting',
+      command: `npm run ${this.script}`,
+      script: this.script,
+      watching: true,
+    });
+    this.spawnDev(projectPath, `npm run ${this.script}`);
+  }
+
+  private unwatch(): void {
+    if (this.restartTimer) {
+      clearTimeout(this.restartTimer);
+      this.restartTimer = null;
+    }
+    this.watcher?.close();
+    this.watcher = null;
   }
 
   /**
@@ -362,6 +558,7 @@ export class ProjectRunner {
   }
 
   stop(): void {
+    this.unwatch();
     const child = this.child;
     this.child = null;
     if (child) {
@@ -536,4 +733,40 @@ async function exists(target: string): Promise<boolean> {
 function trim(text: string): string {
   const flat = text.replace(/\s+/g, ' ').trim();
   return flat.length > 200 ? `${flat.slice(0, 197)}...` : flat;
+}
+
+/**
+ * Kill a dev server and wait for it to be gone.
+ *
+ * Resolves on exit, or after the grace period if the process ignores the
+ * signal — a restart that never happens is worse than one that races.
+ */
+function killAndWait(child: pty.IPty, graceMs = 4_000): Promise<void> {
+  return new Promise((resolve) => {
+    let done = false;
+    const finish = (): void => {
+      if (done) return;
+      done = true;
+      clearTimeout(timer);
+      resolve();
+    };
+    const timer = setTimeout(finish, graceMs);
+    child.onExit(finish);
+    try {
+      child.kill();
+    } catch {
+      finish();
+    }
+  });
+}
+
+/**
+ * Settings key for a project's chosen script.
+ *
+ * Keyed on the normalised path rather than the project id, so the choice
+ * survives a project being removed from the list and added back — which is
+ * what a user does when something looks stuck.
+ */
+function scriptKey(projectPath: string): string {
+  return `runner.script:${path.resolve(projectPath).toLowerCase()}`;
 }

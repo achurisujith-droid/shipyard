@@ -544,11 +544,50 @@ p {
   flex: 1;
 }
 
+/*
+ * Which script starts the app. Shown only when the project offers more than
+ * one, because the names are the project's own and mean nothing on their own —
+ * the command beside each is what makes the choice answerable.
+ */
+.preview-script {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex: none;
+  font-size: var(--text-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.preview-script select {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--ink);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.25rem 0.4rem;
+  max-width: 22ch;
+}
+
+/*
+ * Shipyard restarts this app when files change, so a restart the user did not
+ * ask for is announced before it happens rather than explained after.
+ */
+.preview-watching {
+  align-self: center;
+  margin-right: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
 .preview-actions {
   display: flex;
   gap: var(--space-1);
   flex: none;
   margin-left: auto;
+  align-items: center;
 }
 
 .preview-body {

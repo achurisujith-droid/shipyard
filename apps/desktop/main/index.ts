@@ -57,7 +57,7 @@ function bootstrap(): void {
   // Each project's database lives under userData, so removing a project takes
   // its data with it and nothing is left behind in the user's home directory.
   postgres = new PostgresManager(toolchain, path.join(app.getPath('userData'), 'databases'));
-  runner = new ProjectRunner(emitToRenderer, toolchain, postgres);
+  runner = new ProjectRunner(emitToRenderer, toolchain, postgres, store);
   const intake = new Intake(
     path.join(
       app.isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..'),

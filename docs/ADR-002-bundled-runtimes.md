@@ -87,9 +87,11 @@ Downloading Postgres on demand would save 67 MB in the installer. It would also
 introduce failures our users cannot diagnose: a proxy that blocks it, antivirus
 quarantining an unsigned archive, a hotel network, or no connection at all.
 
-A 250 MB installer is unremarkable next to VS Code (~100 MB) or Docker Desktop
+A large installer is unremarkable next to VS Code (~100 MB) or Docker Desktop
 (~1 GB). Trading it for first-run network failures is a bad deal when the
 audience is people who cannot read a stack trace.
+
+Measured on the first real build: **159 MB downloaded, 565 MB installed.**
 
 ## Consequences
 
@@ -103,7 +105,10 @@ audience is people who cannot read a stack trace.
 
 - The installer is ~170 MB larger.
 - `fetch-toolchain.mjs` must run for each platform before packaging, and cross-
-  building for macOS from Windows needs `--platform darwin --arch arm64`.
+  building for macOS from Windows needs `--platform darwin --arch arm64`. The
+  release workflow asserts the fetch happened and that the sizes are plausible
+  before packaging, because an installer missing them produces an app that
+  starts and then cannot run anything — see [PACKAGING](PACKAGING.md).
 - Node and Postgres versions are pinned in one file and only move when we move
   them, which is the point, but it does mean security updates ship as app
   updates.

@@ -43,7 +43,7 @@ whenever `installPlan()` changes.
 
 | Spec | Actual | Reason |
 | --- | --- | --- |
-| Screen 4 routes to the intake wizard | Routes to a plain folder-picker | The wizard is Milestone 3 and not built. The interim screen exists only to reach the chat proof screen. |
+| Screen 4 routes to the intake wizard | Routed to a plain folder-picker | Resolved: the wizard now exists (`renderer/screens/IntakeScreen.tsx`) and Screen 4 routes to it. The folder-picker was an interim step to reach the chat proof screen. |
 | `sandbox` not discussed | `sandbox: false` | Lets the preload import the shared IPC contract from disk instead of duplicating channel names. `contextIsolation` and no `nodeIntegration` are what actually contain the renderer; the preload exposes no raw Node APIs. |
 | — | Added `SHIPYARD_SMOKE` mode to main | There is no other way to verify the wiring without a human watching the window, and it is what CI will run. |
 

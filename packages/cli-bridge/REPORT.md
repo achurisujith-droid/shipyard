@@ -343,8 +343,12 @@ start, and never key parsing behaviour off a version captured at app launch.
   surfacing the resolved path in the UI's "Show details" so a confused install is
   diagnosable.
 - `node-pty` ships **N-API prebuilds** (`prebuilds/win32-x64/`), so it is ABI-stable
-  and needs no rebuild for Node *or* Electron. `better-sqlite3` (Milestone 2) uses
-  V8 APIs directly and **will** need `electron-rebuild`.
+  and needs no rebuild for Node *or* Electron. The same turned out to be true of
+  `better-sqlite3`: this predicted it would need `electron-rebuild` because older
+  versions used V8 APIs directly, and v13 ships prebuilds too. Both load in
+  Electron's main process at ABI 148 with no rebuild — checked by
+  `apps/desktop/scripts/check-native.cjs`, and the reason `npmRebuild` is off in
+  the packaging config.
 
 ---
 

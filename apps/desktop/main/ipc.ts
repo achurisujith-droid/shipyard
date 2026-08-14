@@ -123,7 +123,10 @@ export function registerIpc(
     },
 
     'runner.inspect': (a) => runner.inspect(safeProjectPath(str(a, 0))),
-    'runner.start': (a) => runner.start(safeProjectPath(str(a, 0))),
+    // The script name reaches a shell as `npm run <name>`, so it is checked
+    // against the project's own package.json rather than trusted. See
+    // safeScriptName.
+    'runner.start': (a) => runner.start(safeProjectPath(str(a, 0)), safeScriptName(a[1])),
     'runner.stop': () => {
       runner.stop();
     },
@@ -295,6 +298,23 @@ function safeProjectPath(input: string): string {
   const resolved = path.resolve(input);
   if (!path.isAbsolute(resolved)) throw new Error('Project path must be absolute');
   return resolved;
+}
+
+/**
+ * An npm script name, or nothing.
+ *
+ * This value ends up inside `npm run <name>`, which is handed to a shell. The
+ * runner only ever runs a name it found in the project's own package.json, so
+ * a hostile value cannot reach the command line — but the renderer is treated
+ * as untrusted, and a shape check at the boundary costs nothing and means the
+ * guarantee does not depend on reading the runner.
+ */
+function safeScriptName(input: unknown): string | undefined {
+  if (typeof input !== 'string' || input.length === 0) return undefined;
+  if (input.length > 64 || !/^[\w.:-]+$/.test(input)) {
+    throw new Error('Script name contains characters that are not allowed');
+  }
+  return input;
 }
 
 /** Exported for the intake wizard in Milestone 3. */

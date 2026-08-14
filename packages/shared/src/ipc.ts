@@ -48,6 +48,24 @@ export interface ProjectRecord {
   missing?: boolean;
 }
 
+/** One of the project's scripts that could start it. */
+export interface RunnableScript {
+  /** The npm script name, e.g. `dev`. */
+  name: string;
+  /**
+   * What that script actually runs, e.g. `vite`. Shown alongside the name,
+   * because "dev" and "start" tell a non-programmer nothing about which is
+   * which and the underlying command sometimes does.
+   */
+  command: string;
+  /**
+   * The script watches the project and restarts itself. Shipyard must not also
+   * restart it: two watchers on one project fight, and the user sees their app
+   * bounce twice for every edit.
+   */
+  selfReloading: boolean;
+}
+
 /** What we learned about how (or whether) this project can be run. */
 export interface RunnerInfo {
   canRun: boolean;
@@ -66,6 +84,17 @@ export interface RunnerInfo {
    * The first run creates one, which takes a few seconds longer.
    */
   needsDatabase?: boolean;
+  /**
+   * Every script that could start this project, likeliest first. Absent for a
+   * static site, which has no scripts at all.
+   *
+   * More than one entry means our pick is a guess. A project with both `dev`
+   * and `start` usually means one is the real entry point and the other builds
+   * for production, and only the person who asked for it knows which.
+   */
+  scripts?: RunnableScript[];
+  /** The script that runs unless the user chooses another. */
+  script?: string;
 }
 
 export type RunnerState =
@@ -85,6 +114,13 @@ export interface RunnerStatus {
   command?: string;
   /** Plain-language explanation, shown when state is `failed`. */
   message?: string;
+  /** The script name this run started from, so the UI can keep showing it. */
+  script?: string;
+  /**
+   * Shipyard is watching the project and will restart the app when Claude
+   * changes a file. Only true for apps that cannot reload themselves.
+   */
+  watching?: boolean;
 }
 
 /**
@@ -168,7 +204,12 @@ export interface ShipyardBridge {
   runner: {
     /** Can this project be started, and with what command? */
     inspect(projectPath: string): Promise<RunnerInfo>;
-    start(projectPath: string): Promise<void>;
+    /**
+     * Start it. `script` overrides our pick and is remembered for this project,
+     * because a user who has already said "it's `serve`, not `dev`" should not
+     * have to say it again every time they press Run.
+     */
+    start(projectPath: string, script?: string): Promise<void>;
     stop(): Promise<void>;
     status(): Promise<RunnerStatus>;
     /**

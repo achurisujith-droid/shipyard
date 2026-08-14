@@ -11,7 +11,7 @@ import os from 'node:os';
 import path from 'node:path';
 
 import type { PostgresManager } from '../main/postgres';
-import { candidateUrl, ProjectRunner } from '../main/project-runner';
+import { candidateUrl, ProjectRunner, selfReloading } from '../main/project-runner';
 import { detectNeeds } from '../main/stack';
 import { startStaticServer } from '../main/static-server';
 import { Toolchain } from '../main/toolchain';
@@ -34,12 +34,21 @@ async function main(): Promise<void> {
   const toolchain = new Toolchain({ root: path.join(root, 'toolchain'), cacheDir: root });
   const postgres = {} as PostgresManager;
 
+  // Stands in for the SQLite-backed Store, so remembering a script choice can
+  // be asserted without an Electron app directory.
+  const settings = new Map<string, string>();
+  const store = {
+    getSetting: (key: string) => settings.get(key),
+    setSetting: (key: string, value: string) => void settings.set(key, value),
+  };
+
   const runner = new ProjectRunner(
     () => {
       /* events ignored for these tests */
     },
     toolchain,
     postgres,
+    store,
   );
 
   // --- empty project ------------------------------------------------------
@@ -111,6 +120,86 @@ async function main(): Promise<void> {
   await writeFile(path.join(hybrid, 'index.html'), '<h1>hi</h1>', 'utf8');
   const hybridInfo = await runner.inspect(hybrid);
   check('falls back to previewing index.html', hybridInfo.canRun === true, JSON.stringify(hybridInfo));
+
+  // --- more than one way to start the project -----------------------------
+  // "First of dev/start/serve wins" is a guess, and for a project where `start`
+  // runs the real server and `dev` only rebuilds assets it is the wrong one.
+  const multi = path.join(root, 'multi-script');
+  await mkdir(path.join(multi, 'node_modules'), { recursive: true });
+  await writeFile(
+    path.join(multi, 'package.json'),
+    json({ scripts: { dev: 'vite build --watch', start: 'node server.js', lint: 'eslint .' } }),
+    'utf8',
+  );
+
+  const multiInfo = await runner.inspect(multi);
+  check(
+    'both start scripts are offered',
+    multiInfo.scripts?.map((s) => s.name).join(',') === 'dev,start',
+    JSON.stringify(multiInfo.scripts),
+  );
+  check(
+    'scripts that cannot start an app are not offered',
+    multiInfo.scripts?.some((s) => s.name === 'lint') === false,
+  );
+  check(
+    'each choice carries the command that explains it',
+    multiInfo.scripts?.find((s) => s.name === 'start')?.command === 'node server.js',
+  );
+  check('dev is picked by default', multiInfo.script === 'dev', JSON.stringify(multiInfo.script));
+
+  // The user says "no, it's start" once and it has to stick — otherwise every
+  // run needs the same correction.
+  settings.set(`runner.script:${path.resolve(multi).toLowerCase()}`, 'start');
+  const remembered = await runner.inspect(multi);
+  check('a remembered choice wins over our ordering', remembered.script === 'start');
+  check('the command follows the remembered choice', remembered.command === 'npm run start');
+
+  // Projects get rewritten. A remembered name that no longer exists must not
+  // strand the Run button on a script npm would refuse.
+  await writeFile(
+    path.join(multi, 'package.json'),
+    json({ scripts: { dev: 'vite build --watch' } }),
+    'utf8',
+  );
+  const orphaned = await runner.inspect(multi);
+  check('a remembered choice that no longer exists falls back', orphaned.script === 'dev');
+  settings.clear();
+
+  // --- does this script restart itself? -----------------------------------
+  // Wrong in one direction: the user edits a file and nothing happens. Wrong in
+  // the other: two watchers fight and the app restarts twice per edit.
+  const reloadCases: Array<[string, boolean]> = [
+    ['vite', true],
+    ['next dev', true],
+    ['nuxt dev', true],
+    ['astro dev', true],
+    ['nodemon server.js', true],
+    ['react-scripts start', true],
+    ['ng serve', true],
+    ['vue-cli-service serve', true],
+    ['webpack serve --mode development', true],
+    ['webpack-dev-server', true],
+    ['tsx watch src/index.ts', true],
+    ['node --watch server.js', true],
+    ['nest start --watch', true],
+    ['vite build --watch', true],
+    // The ones that need our help: a plain process that reads its files once.
+    ['node server.js', false],
+    ['node dist/index.js', false],
+    ['tsx src/index.ts', false],
+    ['npm run build && node server.js', false],
+    ['python -m http.server', false],
+    // Must not fire on a name that merely contains a watching tool's name.
+    ['node next-steps.js', false],
+    ['node vite-config-check.js', false],
+  ];
+  for (const [command, expected] of reloadCases) {
+    check(
+      `${expected ? 'self-reloading' : 'needs a restart'}: ${command}`,
+      selfReloading(command) === expected,
+    );
+  }
 
   // --- finding the app's address in dev-server output ---------------------
   // Frameworks print a URL; hand-written servers print only a port. Missing the
