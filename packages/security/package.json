@@ -1,0 +1,10 @@
+{
+  "name": "@shipyard/security",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Secret redaction, project quarantine and licence scanning",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b", "test": "tsx harness/test-security.ts" },
+  "dependencies": { "@shipyard/shared": "*" }
+}

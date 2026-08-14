@@ -8,6 +8,12 @@
       "path": "packages/cli-bridge"
     },
     {
+      "path": "packages/verification-runner"
+    },
+    {
+      "path": "packages/security"
+    },
+    {
       "path": "packages/capability-resolver"
     },
     {
