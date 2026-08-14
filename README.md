@@ -71,6 +71,10 @@ packages/
   readiness/      the score, and what stands between here and launch
   project-state/  lifecycle states and evidence-backed transitions
   capability-resolver/  intent -> components, vendors, recipes, gates
+  verification-runner/  runs the checks that prove it works
+  security/       redaction, quarantine, licence scanning
+  incident-engine/      failures -> fix tasks -> developer packets
+  service-recommendations/  paid help, only when something justifies it
 apps/
   desktop/        the Electron app
 shipyard-catalog/ rules, capabilities, vendors and services as data

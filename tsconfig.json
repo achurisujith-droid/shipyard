@@ -8,6 +8,12 @@
       "path": "packages/cli-bridge"
     },
     {
+      "path": "packages/service-recommendations"
+    },
+    {
+      "path": "packages/incident-engine"
+    },
+    {
       "path": "packages/verification-runner"
     },
     {
