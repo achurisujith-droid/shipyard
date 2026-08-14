@@ -30,6 +30,7 @@ import type {
   UpgradePlan,
   UpgradeResult,
 } from './components';
+import type { ConnectionStatus, FounderStep, Recipe, SetupPrompt } from './connectors';
 
 /** Channel names. Kept in one place so main and preload cannot drift. */
 export const IPC_CHANNELS = {
@@ -284,6 +285,23 @@ export interface ShipyardBridge {
      * writing to a file, only notice that it did.
      */
     tampering(projectPath: string): Promise<{ path: string; componentId: string; status: 'modified' | 'deleted' }[]>;
+  };
+
+  /**
+   * Connecting the project to somebody else's service.
+   *
+   * Shipyard never receives a credential — the founder puts keys in their own
+   * `.env`, which is not read. So there is no method here that tests a key, and
+   * there cannot be: the only evidence a connection works is the project's own
+   * check having passed.
+   */
+  connectors: {
+    /** What to ask the founder to go and do, worst first. */
+    queue(projectPath: string): Promise<SetupPrompt[]>;
+    /** One connector, with only the steps the founder does themselves. */
+    detail(recipeId: string): Promise<{ recipe: Recipe; steps: FounderStep[] } | null>;
+    /** Where each connection has actually got to. */
+    statuses(projectPath: string): Promise<ConnectionStatus[]>;
   };
 
   app: {

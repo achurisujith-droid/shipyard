@@ -28,6 +28,7 @@ interface Props {
   prefill?: string;
   onExit: () => void;
   onOpenLibrary: () => void;
+  onOpenConnectors: () => void;
 }
 
 type Entry =
@@ -42,7 +43,7 @@ const SUGGESTIONS = [
   'Make a simple page that says hello, so I can see it working.',
 ];
 
-export function ChatScreen({ session, prefill, onExit, onOpenLibrary }: Props): JSX.Element {
+export function ChatScreen({ session, prefill, onExit, onOpenLibrary, onOpenConnectors }: Props): JSX.Element {
   const [entries, setEntries] = useState<Entry[]>([]);
   /** The reply being written. Replaced wholesale on each update, never appended. */
   const [partial, setPartial] = useState('');
@@ -184,6 +185,9 @@ export function ChatScreen({ session, prefill, onExit, onOpenLibrary }: Props): 
               one, not before they started. */}
           <button className="btn btn-quiet btn-sm" onClick={onOpenLibrary}>
             Ready-made parts
+          </button>
+          <button className="btn btn-quiet btn-sm" onClick={onOpenConnectors}>
+            Accounts
           </button>
           <button
             className="btn btn-quiet btn-sm"

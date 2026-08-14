@@ -1,0 +1,299 @@
+[
+  {
+    "id": "stripe_checkout",
+    "name": "Taking payment with Stripe",
+    "summary": "Your customers can pay you, and the money arrives in your bank account.",
+    "vendorId": "stripe",
+    "capabilities": ["subscription_payments"],
+    "requiresComponents": ["stripe_subscription_billing"],
+    "leadTime": "long",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Create a Stripe account. Use test mode to begin with — you can build everything against it without giving Stripe your bank details.",
+        "url": "https://dashboard.stripe.com/register",
+        "because": "Test mode behaves exactly like the real thing and charges nobody."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Start Stripe's business verification as soon as you can, even though you cannot take real money yet.",
+        "url": "https://dashboard.stripe.com/settings/update",
+        "because": "Stripe checks who you are before it will pay out to you, and that takes days rather than minutes. Started late, it is the thing that holds up your launch.",
+        "critical": true
+      },
+      {
+        "actor": "founder",
+        "instruction": "Create a product with a recurring price, and copy its price id.",
+        "url": "https://dashboard.stripe.com/test/products",
+        "produces": "STRIPE_PRICE_ID"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy your test secret key and paste it into the .env file Shipyard made for you.",
+        "url": "https://dashboard.stripe.com/test/apikeys",
+        "produces": "STRIPE_SECRET_KEY",
+        "because": "This key can move money. It goes in .env, which stays on your computer and is never sent anywhere.",
+        "critical": true
+      },
+      {
+        "actor": "agent",
+        "instruction": "Wire the checkout button on the page where the customer decides to pay."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Make one payment with Stripe's test card 4242 4242 4242 4242 and check the subscription appears.",
+        "because": "Nothing here has moved money. Until one test payment goes through, none of it is proven.",
+        "critical": true
+      }
+    ],
+    "secrets": ["STRIPE_SECRET_KEY"],
+    "settings": [
+      { "name": "STRIPE_PRICE_ID", "description": "Which plan people are subscribing to.", "example": "price_1A2b3C" }
+    ],
+    "verifiedBy": "failed_payment_flow_tested",
+    "costNote": "Stripe takes a percentage of each payment. There is no monthly fee to start.",
+    "limitations": [
+      "Tax is left to Stripe. Whether that satisfies the rules where you operate is a question for an accountant.",
+      "Shipyard never sees your Stripe key, so it cannot tell you the key is valid — only that a payment went through."
+    ]
+  },
+  {
+    "id": "stripe_webhooks",
+    "name": "Stripe telling your app what happened",
+    "summary": "When a payment succeeds or fails, your app finds out about it.",
+    "vendorId": "stripe",
+    "capabilities": ["subscription_payments"],
+    "requiresComponents": ["stripe_subscription_billing"],
+    "leadTime": "instant",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "In Stripe, add a webhook endpoint pointing at your app's address followed by /api/billing/webhook.",
+        "url": "https://dashboard.stripe.com/test/webhooks",
+        "because": "Without this your app never learns that a payment succeeded, and a paying customer stays locked out."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy the signing secret it shows you into your .env file.",
+        "produces": "STRIPE_WEBHOOK_SECRET",
+        "because": "This is what proves a message really came from Stripe. Without it, anyone who finds your address could tell your app they paid.",
+        "critical": true
+      },
+      {
+        "actor": "founder",
+        "instruction": "Send a test event from the Stripe dashboard and check your app accepted it."
+      }
+    ],
+    "secrets": ["STRIPE_WEBHOOK_SECRET"],
+    "verifiedBy": "stripe_webhook_signature_verified",
+    "limitations": [
+      "While you are building on your own computer, Stripe cannot reach your app. Use the Stripe CLI to forward events, or test after your first deployment."
+    ]
+  },
+  {
+    "id": "transactional_email_basic",
+    "name": "Sending email to your users",
+    "summary": "Your app can email people — sign-in links, receipts, notifications.",
+    "vendorId": "resend",
+    "capabilities": ["transactional_email"],
+    "requiresComponents": ["transactional_email"],
+    "leadTime": "long",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Create an account with an email provider.",
+        "url": "https://resend.com/signup"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Add your domain and put the DNS records it gives you at your domain registrar.",
+        "because": "Until your domain is verified, your email either does not send or goes straight to spam. DNS changes can take a day to spread, which is why this is worth starting early.",
+        "critical": true
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy the API key into your .env file.",
+        "produces": "EMAIL_API_KEY"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Set the address your email comes from. It has to be at the domain you just verified.",
+        "produces": "EMAIL_FROM"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Send one real email to yourself and check it arrives in the inbox rather than the spam folder.",
+        "critical": true
+      }
+    ],
+    "secrets": ["EMAIL_API_KEY"],
+    "settings": [
+      { "name": "EMAIL_FROM", "description": "The address your email comes from.", "example": "hello@yourdomain.com" }
+    ],
+    "verifiedBy": "transactional_email_sends",
+    "limitations": [
+      "Until you set a key, email is printed to the console instead of sent. That is deliberate — it stops a test run emailing real customers.",
+      "Whether your email reaches inboxes depends on your domain's reputation, which nothing here can shortcut."
+    ]
+  },
+  {
+    "id": "sentry_nextjs_basic",
+    "name": "Finding out when your app breaks",
+    "summary": "When something goes wrong for a user, you hear about it instead of guessing.",
+    "vendorId": "sentry",
+    "capabilities": ["error_monitoring"],
+    "requiresComponents": ["sentry_error_monitoring"],
+    "leadTime": "instant",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Create a free Sentry account and a project for this app.",
+        "url": "https://sentry.io/signup/"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy the DSN it gives you into your .env file.",
+        "produces": "SENTRY_DSN"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Open /api/monitoring/test-event in your app once, then check the error appears in Sentry.",
+        "because": "\"We installed error monitoring\" and \"errors reach us\" are different claims. Only the second one is worth anything, and this is the only way to tell them apart.",
+        "critical": true
+      }
+    ],
+    "secrets": ["SENTRY_DSN"],
+    "verifiedBy": "error_monitoring_receives_test_event",
+    "costNote": "The free tier covers a small app comfortably.",
+    "limitations": [
+      "It reports errors your code throws. A page that shows the wrong number without failing is invisible to it."
+    ]
+  },
+  {
+    "id": "s3_storage_basic",
+    "name": "Somewhere to keep uploaded files",
+    "summary": "People can upload files, and the files are still there tomorrow.",
+    "vendorId": "cloudflare_r2",
+    "capabilities": ["file_storage"],
+    "requiresComponents": ["s3_file_storage"],
+    "leadTime": "short",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Create a Cloudflare account and a storage bucket.",
+        "url": "https://dash.cloudflare.com/sign-up"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Keep the bucket private.",
+        "because": "Your app hands out short-lived links to the people allowed to see each file. A public bucket makes that pointless — anyone who guesses an address can read anything in it.",
+        "critical": true
+      },
+      {
+        "actor": "founder",
+        "instruction": "Create an access key with permission to read and write that bucket only.",
+        "produces": "S3_ACCESS_KEY_ID"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy the key, the secret and the bucket name into your .env file.",
+        "produces": "S3_SECRET_ACCESS_KEY"
+      },
+      {
+        "actor": "founder",
+        "instruction": "Upload one file and download it again."
+      }
+    ],
+    "secrets": ["S3_ACCESS_KEY_ID", "S3_SECRET_ACCESS_KEY"],
+    "settings": [
+      { "name": "S3_BUCKET", "description": "The bucket your files go in.", "example": "my-app-uploads" },
+      { "name": "S3_ENDPOINT", "description": "The storage address Cloudflare gives you." }
+    ],
+    "verifiedBy": "file_storage_round_trip",
+    "costNote": "Cloudflare R2 charges for storage but not for getting files back out, which is the charge that usually surprises people.",
+    "limitations": [
+      "No virus scanning. If strangers can upload, you need that as well."
+    ]
+  },
+  {
+    "id": "railway_deployment",
+    "name": "Putting your app on the internet",
+    "summary": "Your app runs somewhere other than your computer, at an address you can send people.",
+    "vendorId": "railway",
+    "capabilities": ["deployment"],
+    "leadTime": "short",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Create a Railway account and connect it to your GitHub.",
+        "url": "https://railway.app/"
+      },
+      {
+        "actor": "agent",
+        "instruction": "Push the project to a GitHub repository."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Create a project on Railway from that repository."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy every setting from your .env into Railway's own variables.",
+        "because": "Your .env file stays on your computer and is never uploaded. The deployed app has none of those values until you put them there yourself.",
+        "critical": true
+      },
+      {
+        "actor": "founder",
+        "instruction": "Open the address it gives you and check the app loads."
+      }
+    ],
+    "secrets": [],
+    "verifiedBy": "deployed_health_check_passes",
+    "costNote": "Railway charges by usage. A small app costs a few dollars a month.",
+    "limitations": [
+      "Shipyard does not deploy for you and holds no Railway credentials. It can tell you what to do and check the result."
+    ]
+  },
+  {
+    "id": "postgres_deployment",
+    "name": "A database that lives on the internet",
+    "summary": "The information in your app is kept somewhere other than your laptop.",
+    "vendorId": "railway",
+    "capabilities": ["deployment", "database_schema"],
+    "leadTime": "instant",
+    "requiredFrom": "customer_pilot",
+    "steps": [
+      {
+        "actor": "founder",
+        "instruction": "Add a PostgreSQL database to your Railway project."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Copy its connection string into the deployed app's DATABASE_URL variable.",
+        "produces": "DATABASE_URL",
+        "critical": true
+      },
+      {
+        "actor": "agent",
+        "instruction": "Run the database migrations against it so the tables exist."
+      },
+      {
+        "actor": "founder",
+        "instruction": "Decide how this database gets backed up, and write down the answer.",
+        "because": "Railway takes backups on some plans and not others. Finding out which after losing data is the expensive way.",
+        "critical": true
+      }
+    ],
+    "secrets": ["DATABASE_URL"],
+    "verifiedBy": "database_persists_across_restart",
+    "limitations": [
+      "The database Shipyard runs on your computer and this one are separate. Information does not move between them by itself."
+    ]
+  }
+]

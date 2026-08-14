@@ -32,6 +32,7 @@
     "@shipyard/capability-resolver": "*",
     "@shipyard/cli-bridge": "*",
     "@shipyard/component-library": "*",
+    "@shipyard/connectors": "*",
     "@shipyard/project-contracts": "*",
     "@shipyard/readiness": "*",
     "@shipyard/rulebook": "*",

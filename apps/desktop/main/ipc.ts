@@ -19,6 +19,7 @@ import {
 
 import type { CLIManager } from './cli-manager';
 import type { Intake } from './intake';
+import type { Connectors } from './connectors';
 import type { Contracts } from './contracts';
 import type { Library } from './library';
 import type { ProjectRunner } from './project-runner';
@@ -44,6 +45,7 @@ export function registerIpc(
   intake: Intake,
   library: Library,
   contracts: Contracts,
+  connectors: Connectors,
 ): void {
   const handlers: Record<string, Handler> = {
     'claude.detect': () => manager.detect(false),
@@ -175,6 +177,16 @@ export function registerIpc(
     },
     'library.installed': (a) => library.installed(safeProjectPath(str(a, 0))),
     'library.tampering': (a) => library.tampering(safeProjectPath(str(a, 0))),
+
+    'connectors.queue': (a) => {
+      const projectPath = safeProjectPath(str(a, 0));
+      return connectors.queue(projectPath, store.findProjectByPath(projectPath)?.id);
+    },
+    'connectors.detail': (a) => connectors.detail(safeComponentId(a[0])),
+    'connectors.statuses': (a) => {
+      const projectPath = safeProjectPath(str(a, 0));
+      return connectors.statuses(projectPath, store.findProjectByPath(projectPath)?.id);
+    },
 
     'intake.plan': (a) => intake.plan(asAnswers(a[0]), safeProjectPath(str(a, 1))),
     'intake.create': async (a) => {

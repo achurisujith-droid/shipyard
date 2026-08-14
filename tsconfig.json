@@ -35,6 +35,9 @@
       "path": "packages/project-contracts"
     },
     {
+      "path": "packages/connectors"
+    },
+    {
       "path": "packages/project-state"
     },
     {

@@ -8,6 +8,7 @@ import { GATES } from '@shipyard/verification-runner';
 import { CLIManager } from './cli-manager';
 import { Intake } from './intake';
 import { registerIpc } from './ipc';
+import { Connectors } from './connectors';
 import { Contracts } from './contracts';
 import { Library, componentsRoot } from './library';
 import { PostgresManager } from './postgres';
@@ -75,6 +76,7 @@ function bootstrap(): void {
   const metadata = store.metadata;
   const projects = store;
   const contracts = new Contracts(catalogRoot, metadata);
+  const connectors = new Connectors(catalogRoot, metadata);
   const library = new Library({
     root: componentsRoot(app.isPackaged, __dirname),
     // Installing something changes what the project is made of, so the
@@ -96,7 +98,7 @@ function bootstrap(): void {
     knownGates: GATES.map((gate) => gate.id),
     metadata: store.metadata,
   });
-  registerIpc(manager, store, runner, toolchain, intake, library, contracts);
+  registerIpc(manager, store, runner, toolchain, intake, library, contracts, connectors);
   createWindow();
 
   app.on('activate', () => {

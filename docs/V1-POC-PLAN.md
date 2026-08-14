@@ -119,7 +119,7 @@ evidence the next one consumes:
 | P4 | Rulebook engine | Done |
 | P5 | Project state machine | Done (transition UI not built) |
 | P6 | Vendor catalog | Done as data; admin edit UI not built |
-| P7 | Integration recipe runner | Not started |
+| P7 | Integration recipe runner | **Done as connectors** — 7 recipes, the timing engine that decides when to ask, and status that distinguishes "filled in" from "working". Shipyard opens no accounts and holds no keys. |
 | P8 | Verified skills registry | **Done** — manifests, versions, trust levels, declared applicability, and a check that their factual claims match what the app ships |
 | P9 | Component library foundation | **Done** — 13 components, manifest format, browse/plan/install engine, protected paths, browse UI. 229 contract tests pass against a real install |
 | P10 | Capability resolver | Done |
@@ -136,12 +136,14 @@ evidence the next one consumes:
 
 ### What is left, and why it is left
 
-- **P7 recipes** and **P14 Sentry** need real accounts and real credentials to
-  be worth anything. A recipe that has never installed against the live service
-  is documentation with a version number. The Stripe, S3 and Sentry components
-  exist and are marked `provisional` for exactly this reason: their logic is
-  tested, the money has never moved, and no event has ever reached a Sentry
-  project.
+- **P7 is done differently from the plan, deliberately.** The plan imagined a
+  recipe *runner* that performs the integration. Shipyard cannot: it never
+  receives a credential, so it cannot test one. What it does instead is the part
+  that is actually hard — knowing *when* to ask the founder to open an account,
+  and being honest that a key being present is not the same as it working.
+  See [CONNECTORS](CONNECTORS.md).
+- **P14 Sentry** still needs a real account for the event-collector half. The
+  connector and the component exist; nothing has received an event.
 - **P11 task composer** is half-built: `composeFixTask` does it for incidents.
   Doing it for plans and failed gates is the same shape.
 - **P8 skills registry** — the five skills exist and are copied into projects.

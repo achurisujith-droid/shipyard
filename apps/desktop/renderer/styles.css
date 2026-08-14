@@ -2039,3 +2039,199 @@ p {
   font-family: var(--font-mono);
   font-size: var(--text-sm);
 }
+
+/* ── Accounts the founder opens themselves ─────────────────────────────────
+ *
+ * Ordered by when to start, not by importance. The "worth starting now"
+ * section is the whole point: those are the ones with a wait attached, and
+ * they are the reason a launch slips.
+ */
+
+.connectors {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: var(--space-6);
+  overflow-y: auto;
+  height: 100%;
+}
+
+.connectors-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+.connectors-header h1 {
+  font-size: var(--text-2xl);
+  margin: 0 0 var(--space-2);
+}
+
+.connectors-header p {
+  color: var(--muted);
+  margin: 0;
+  max-width: 46ch;
+}
+
+.connectors-section {
+  margin-bottom: var(--space-6);
+}
+
+.connectors-section h2 {
+  font-size: var(--text-lg);
+  margin: 0 0 var(--space-2);
+}
+
+.connectors-note {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  margin: 0 0 var(--space-3);
+}
+
+.connectors-section ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.connectors-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: var(--ink);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.connectors-item:hover {
+  border-color: var(--border-interactive);
+}
+
+.connectors-item-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+.connectors-reason {
+  color: var(--muted);
+  font-size: var(--text-sm);
+}
+
+.connectors-effort {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.badge-broken {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.connectors-detail {
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  background: var(--surface);
+  margin-top: var(--space-5);
+}
+
+.connectors-detail header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.connectors-detail h2 {
+  font-size: var(--text-lg);
+  margin: 0;
+}
+
+.connectors-detail h3 {
+  font-size: var(--text-base);
+  margin: var(--space-5) 0 var(--space-2);
+}
+
+.connectors-status {
+  font-size: var(--text-sm);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+}
+
+.connectors-steps {
+  padding-left: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.connectors-steps li {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* A step whose omission causes an outage or a breach reads differently from
+ * one that is merely next. */
+.connectors-steps li.is-critical {
+  border-left: 3px solid var(--warn);
+  padding-left: var(--space-3);
+  margin-left: calc(var(--space-3) * -1);
+}
+
+.connectors-because {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.connectors-produces {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.connectors-link {
+  align-self: flex-start;
+  font: inherit;
+  font-size: var(--text-sm);
+  color: var(--primary);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.connectors-cost,
+.connectors-privacy {
+  font-size: var(--text-sm);
+  color: var(--muted);
+}
+
+.connectors-privacy {
+  border-top: 1px solid var(--border);
+  padding-top: var(--space-3);
+  margin-top: var(--space-5);
+}
+
+.connectors-limits {
+  color: var(--muted);
+  font-size: var(--text-sm);
+  padding-left: 1.25rem;
+}
+
+.connectors-error {
+  color: var(--danger);
+}

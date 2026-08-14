@@ -73,6 +73,11 @@ const api: ShipyardApi = {
     installed: (projectPath) => call('library.installed', projectPath),
     tampering: (projectPath) => call('library.tampering', projectPath),
   },
+  connectors: {
+    queue: (projectPath) => call('connectors.queue', projectPath),
+    detail: (recipeId) => call('connectors.detail', recipeId),
+    statuses: (projectPath) => call('connectors.statuses', projectPath),
+  },
   intake: {
     plan: (answers, projectPath) => call('intake.plan', answers, projectPath),
     create: (plan, markdown) => call('intake.create', plan, markdown),

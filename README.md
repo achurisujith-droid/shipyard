@@ -44,6 +44,7 @@ macOS and Linux are not built yet.
 | Decision layer: rules, readiness, capabilities, verification, incidents | Built, 190 cases across 6 packages |
 | Planning: `PROJECT.md`, `ARCHITECTURE.md`, four `shipyard.*.json` contracts | Built, regenerated whenever the project changes |
 | Skills registry, agent task composer | Built, 84 cases |
+| Connectors: 7 recipes, and when to ask for each account | Built, 48 cases ([CONNECTORS](docs/CONNECTORS.md)) |
 | Component library: 13 components | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 160 engine cases plus 229 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
 | Guided install and sign-in | Written, never executed — needs a clean VM |
@@ -83,6 +84,7 @@ packages/
   skills-registry/      what the agent is told, versioned and claim-checked
   task-composer/        plans, gaps and failing checks -> work the agent can do
   project-contracts/    ARCHITECTURE.md and the shipyard.*.json files
+  connectors/           what the founder sets up, and when to ask them
 apps/
   desktop/        the Electron app
 components/       the verified components themselves, one folder each
@@ -100,6 +102,7 @@ docs/
 | [PRODUCT.md](PRODUCT.md) | Who this is for, the voice, the design principles |
 | [ADR-001](docs/ADR-001-cli-transport.md) | Why the CLI is driven through a PTY and never headless |
 | [COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md) | What makes something a component, what trust levels mean, where the code came from |
+| [CONNECTORS](docs/CONNECTORS.md) | Why Shipyard holds no keys, and how it decides when to ask for an account |
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
 | [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
 | [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |

@@ -7,10 +7,11 @@ import { ClaudeCheckScreen } from './screens/ClaudeCheckScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { PlanCheckScreen } from './screens/PlanCheckScreen';
 import { IntakeScreen } from './screens/IntakeScreen';
+import { ConnectorsScreen } from './screens/ConnectorsScreen';
 import { LibraryScreen } from './screens/LibraryScreen';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 
-type Screen = 'welcome' | 'claude-check' | 'plan-check' | 'home' | 'new' | 'chat' | 'library';
+type Screen = 'welcome' | 'claude-check' | 'plan-check' | 'home' | 'new' | 'chat' | 'library' | 'connectors';
 
 export function App(): JSX.Element {
   const [screen, setScreen] = useState<Screen>('welcome');
@@ -70,7 +71,15 @@ export function App(): JSX.Element {
           prefill={prefill}
           onExit={() => setScreen('home')}
           onOpenLibrary={() => setScreen('library')}
+          onOpenConnectors={() => setScreen('connectors')}
         />
+      ) : (
+        <HomeScreen onOpened={openSession} onNew={() => setScreen('new')} />
+      );
+
+    case 'connectors':
+      return session ? (
+        <ConnectorsScreen projectPath={session.cwd} onBack={() => setScreen('chat')} />
       ) : (
         <HomeScreen onOpened={openSession} onNew={() => setScreen('new')} />
       );
