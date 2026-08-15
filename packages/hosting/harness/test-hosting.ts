@@ -31,6 +31,22 @@ import {
   readyToDeploy,
   slugFor,
   temporaryUrl,
+  OPERATIONAL_REQUIREMENTS,
+  RESPONSIBILITIES,
+  blockingRequirements,
+  mustBeToldBeforeLaunch,
+  ownedBy,
+  readyToHost,
+  responsibility,
+  RETENTION_DAYS,
+  describeGroup,
+  fingerprint,
+  group,
+  isExpired,
+  looksLikeAnError,
+  redactForStorage,
+  toRawEvent,
+  type LogLine,
 } from '../src/index';
 
 let failed = 0;
@@ -287,6 +303,155 @@ async function main(): Promise<void> {
     }).ready,
   );
   check('missing settings are listed by name', missingSettings([{ name: 'X', provided: false, secret: false }]).length === 1);
+
+  // ========================================================= responsibility
+  check('every responsibility says who owns it', RESPONSIBILITIES.every((entry) => Boolean(entry.owner)));
+  check('anything we own says what we do', ownedBy('shipyard').every((entry) => Boolean(entry.ours)));
+  check('anything they own says what they do', ownedBy('founder').every((entry) => Boolean(entry.theirs)));
+  // The dangerous kind: both halves have to be named, or it belongs to nobody.
+  check(
+    'anything shared says which half is whose',
+    ownedBy('shared').every((entry) => Boolean(entry.ours) && Boolean(entry.theirs)),
+  );
+  check('the platform staying up is ours', responsibility('platform_uptime')?.owner === 'shipyard');
+  check('keeping one app away from another is ours', responsibility('isolation')?.owner === 'shipyard');
+  check('their code being right is theirs', responsibility('app_correctness')?.owner === 'founder');
+  check('who can see what inside their app is theirs', responsibility('app_access_control')?.owner === 'founder');
+  check('patching is split, because it is two layers', responsibility('runtime_patching')?.owner === 'shared');
+
+  // The sentence a normal hosting provider leaves in the terms and we cannot.
+  const dataDuty = responsibility('data_you_collect');
+  check('the information their app collects is theirs', dataDuty?.owner === 'founder');
+  check(
+    'and they are told they become responsible for it in law',
+    /your responsibility in law/.test(dataDuty?.mustBeTold ?? ''),
+  );
+  check(
+    'with the jargon explained rather than used',
+    /what the rules call the "controller"/.test(dataDuty?.mustBeTold ?? ''),
+  );
+  check(
+    'and which part Shipyard can actually help with',
+    /parts that do the handing back and deleting/.test(dataDuty?.mustBeTold ?? ''),
+  );
+
+  const told = mustBeToldBeforeLaunch();
+  check('there is a list of what they must be told', told.length >= 8, `${told.length}`);
+  check('each a sentence they could act on', told.every((entry) => entry.message.length > 60));
+  check(
+    'including that a successful deploy is not a working app',
+    told.some((entry) => /started, not that it works/.test(entry.message)),
+  );
+  check(
+    'and that a breach deadline is theirs, in hours',
+    told.some((entry) => /hours, not weeks/.test(entry.message)),
+  );
+
+  // ==================================================== operational readiness
+  check('there is a list of what must exist first', OPERATIONAL_REQUIREMENTS.length >= 10);
+  check('every item says why', OPERATIONAL_REQUIREMENTS.every((entry) => entry.because.length > 40));
+  check('the blocking ones are marked', blockingRequirements().length >= 8);
+  check('isolation being proven is one', blockingRequirements().some((e) => e.id === 'isolation_proven'));
+  check('and a restore having actually been done', blockingRequirements().some((e) => e.id === 'restore_tested'));
+  check(
+    'and a processing agreement, because their customers’ data sits on our servers',
+    blockingRequirements().some((e) => e.id === 'processing_agreement'),
+  );
+  check(
+    'and a spend cap, because a runaway loop is charged to us first',
+    blockingRequirements().some((e) => e.id === 'spend_cap'),
+  );
+
+  const nothingDone = readyToHost([]);
+  check('with nothing done, hosting is refused', !nothingDone.ready);
+  check('and everything missing is listed', nothingDone.missing.length === blockingRequirements().length);
+  check('the summary names them rather than counting', /restore/.test(nothingDone.summary));
+
+  const almost = readyToHost(blockingRequirements().slice(1).map((entry) => entry.id));
+  check('one thing missing still refuses', !almost.ready && almost.missing.length === 1);
+
+  const allDone = readyToHost(blockingRequirements().map((entry) => entry.id));
+  check('everything done allows it', allDone.ready);
+  check(
+    'without claiming more than that',
+    /before hosting somebody else’s app exists/.test(allDone.summary),
+    allDone.summary,
+  );
+
+  // ================================================= logs coming back to them
+  const line = (over: Partial<LogLine> = {}): LogLine => ({
+    deploymentId: 'dep_1',
+    stream: 'stderr',
+    at: '2026-08-15T09:14:00.000Z',
+    text: 'Error: something broke',
+    ...over,
+  });
+
+  // What Shipyard keeps becomes a copy of somebody's customers' data unless
+  // this works.
+  check(
+    'an email address in a log is not stored',
+    !redactForStorage('failed for sam@example.com').includes('sam@example.com'),
+  );
+  check('nor a visitor’s IP address', !redactForStorage('request from 203.0.113.44').includes('203.0.113.44'));
+  check('nor a card number', !redactForStorage('card 4242 4242 4242 4242').includes('4242 4242'));
+  check('nor a database password', !redactForStorage('connect postgres://app:hunter2@db/x').includes('hunter2'));
+  check('nor a token in a URL', !redactForStorage('GET /reset?token=abc123def456').includes('abc123def456'));
+  check(
+    'but the useful part survives',
+    redactForStorage('connect postgres://app:hunter2@db.internal/x').includes('db.internal'),
+  );
+  check('and a very long line is cut', redactForStorage('x'.repeat(9000)).length < 2100);
+
+  check('our copy does not live forever', RETENTION_DAYS <= 30);
+  check('and old lines are droppable', isExpired('2026-01-01T00:00:00.000Z', new Date('2026-08-15T00:00:00.000Z')));
+  check(
+    'while recent ones are not',
+    !isExpired('2026-08-14T00:00:00.000Z', new Date('2026-08-15T00:00:00.000Z')),
+  );
+
+  // Crying wolf on day one is how the real alert gets ignored.
+  check('a real error is noticed', looksLikeAnError(line({ text: 'Error: cannot read property id' })));
+  check('a crash in a stack trace is noticed', looksLikeAnError(line({ text: 'at handler (src/app/api/x.ts:31:9)' })));
+  check('a 500 is noticed', looksLikeAnError(line({ stream: 'request', status: 500, text: 'GET /orders' })));
+  check('a 404 is not', !looksLikeAnError(line({ stream: 'request', status: 404, text: 'GET /nope' })));
+  check('a warning is not', !looksLikeAnError(line({ text: 'warn - deprecated API used' })));
+  check('framework narration is not', !looksLikeAnError(line({ text: 'ready - started server on 0.0.0.0:3000' })));
+  check('an experimental warning is not', !looksLikeAnError(line({ text: '(node:1) ExperimentalWarning: x' })));
+  check('ordinary stdout is not', !looksLikeAnError(line({ stream: 'stdout', text: 'Processed 40 rows' })));
+
+  const event = toRawEvent(line({ text: 'Error: failed for sam@example.com\n    at handler (x.ts:1:1)' }));
+  check('an error becomes something the incident engine understands', event?.source === 'shipyard_hosting');
+  check('marked as production, because it is', event?.environment === 'production');
+  // Everything downstream is built from this, so a leak here leaks everywhere.
+  check('with the customer’s email already gone', !JSON.stringify(event).includes('sam@example.com'));
+  check('and the stack kept when there is one', Boolean(event?.stack));
+  check(
+    'a 500 is titled in a way a person can read',
+    toRawEvent(line({ stream: 'request', status: 500, route: '/orders', text: 'x' }))?.title === '500 on /orders',
+  );
+  check('and noise produces nothing at all', toRawEvent(line({ text: 'warn - x' })) === null);
+
+  // One broken page, not four thousand notifications.
+  const many = Array.from({ length: 412 }, (_, index) => ({
+    event: toRawEvent(line({ text: `Error: order ${index} not found` }))!,
+    at: `2026-08-15T09:${String(14 + (index % 40)).padStart(2, '0')}:00.000Z`,
+  }));
+  const grouped = group(many);
+  check('four hundred identical errors are one problem', grouped.length === 1, `${grouped.length} groups`);
+  check('with the count kept', grouped[0]?.count === 412);
+  check('ids in the message do not defeat the grouping', fingerprint(many[0]!.event) === fingerprint(many[9]!.event));
+  check(
+    'genuinely different errors stay separate',
+    group([
+      { event: toRawEvent(line({ text: 'Error: database is unreachable' }))!, at: '2026-08-15T09:00:00.000Z' },
+      { event: toRawEvent(line({ text: 'Error: payment declined' }))!, at: '2026-08-15T09:01:00.000Z' },
+    ]).length === 2,
+  );
+
+  // The number is the decision, not the message.
+  check('a repeated error says how many times it happened', /happened 412 times/.test(describeGroup(grouped[0]!)));
+  check('and a one-off says so plainly', /happened once/.test(describeGroup({ ...grouped[0]!, count: 1 })));
 
   console.log(`\n${failed === 0 ? 'All hosting cases pass.' : `${failed} case(s) failed.`}`);
   process.exitCode = failed > 0 ? 1 : 0;

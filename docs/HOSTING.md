@@ -113,6 +113,38 @@ A crash after a successful build points at the likeliest cause rather than a
 stack trace: the live app has none of the `.env` settings until they are entered
 here.
 
+## Logs and errors come back here
+
+The half of hosting that pays for the rest.
+
+The incident engine has existed for a while with nothing to feed it: turning a
+production failure into a fix task needed somebody's Sentry account, which
+needed the founder to have set one up, which most had not. Hosting removes that
+— we are running the process, so we already see it crash. The error appears in
+the app the founder is already in, next to the conversation where it can be
+fixed.
+
+**Two different things, treated differently.** What the founder sees is their
+app and their data, streamed as it is. What Shipyard *keeps* is redacted first,
+bounded to 14 days, and only what an incident needs. Every fix task, support
+bundle and escalation packet is built from the redacted copy.
+
+Getting that backwards is how a hosting provider ends up holding a shadow copy
+of every customer database in its log store. Email addresses, IP addresses, card
+numbers and tokens are stripped before storage — an error message quotes the row
+it choked on, and that row is somebody's customer.
+
+**Not everything on stderr is an incident.** A hosted Next.js app narrates
+itself constantly. Treating all of it as a problem would produce a product that
+cries wolf on day one and a founder who learns to ignore the thing meant to tell
+them their app is broken. Warnings, deprecations and framework chatter are
+filtered; stack traces, 500s and unhandled errors are not.
+
+**Errors are grouped, not counted.** A crashing route logs on every request. 412
+identical failures are one problem with a number attached, and the number is the
+useful part — "this has happened 412 times since 09:14" is a decision a founder
+can make. 412 rows is not.
+
 ## What is not built
 
 **All of the infrastructure.** There is no build service, no runtime, no
