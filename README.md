@@ -1,4 +1,4 @@
-# Shipyard
+﻿# Shipyard
 
 A desktop app that drives the user's own Claude Code installation.
 
@@ -14,14 +14,14 @@ would. [`PRODUCT.md`](PRODUCT.md) is what it is for and who it is for.
 ## Download
 
 **[Latest release](https://github.com/achurisujith-droid/shipyard/releases/latest)**
-— Windows 10 or 11, 64-bit. Download `Shipyard-Setup-<version>-x64.exe` and run
+â€” Windows 10 or 11, 64-bit. Download `Shipyard-Setup-<version>-x64.exe` and run
 it. It installs for your user account only, so it never asks for an
 administrator password.
 
 **Windows will warn you before it runs.** The installer is not code signed yet,
 so SmartScreen shows "Windows protected your PC". Choose **More info**, then
 **Run anyway**. That is what an unsigned download from a small publisher looks
-like — it is not a claim that anything is wrong with the file. Signing is
+like â€” it is not a claim that anything is wrong with the file. Signing is
 [tracked in the packaging notes](docs/PACKAGING.md#things-that-will-bite).
 
 You need a Claude subscription. Shipyard drives your own Claude Code install; if
@@ -39,15 +39,15 @@ macOS and Linux are not built yet.
 | --- | --- |
 | cli-bridge: detect, auth, drive a session | Passing on Windows ([REPORT](packages/cli-bridge/REPORT.md)) |
 | Electron shell and first-run flow | Passing on Windows ([MILESTONE-2](docs/MILESTONE-2.md)) |
-| Intake wizard → `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
+| Intake wizard â†’ `PROJECT.md` | Built, covered by `npm run test:intake -w @shipyard/desktop` |
 | Run, preview, fix loop | Built ([RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md)) |
 | Decision layer: rules, readiness, capabilities, verification, incidents | Built, 190 cases across 6 packages |
 | Planning: `PROJECT.md`, `ARCHITECTURE.md`, four `shipyard.*.json` contracts | Built, regenerated whenever the project changes |
 | Skills registry, agent task composer | Built, 84 cases |
 | Connectors: 7 recipes, and when to ask for each account | Built, 48 cases ([CONNECTORS](docs/CONNECTORS.md)) |
-| Component library: 16 components, matched from requirements | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 166 engine cases plus 321 contract tests passing against a real install |
+| Component library: 16 components, matched from requirements | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) â€” browse, install, update and remove; 166 engine cases plus 321 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
-| Guided install and sign-in | Written, never executed — needs a clean VM |
+| Guided install and sign-in | Written, never executed â€” needs a clean VM |
 | macOS, Linux | Not started |
 
 Two paths have never run: the guided install of Claude Code, and sign-in. Both
@@ -61,7 +61,7 @@ changing anything in `packages/cli-bridge`. The short version:
 
 - **The shipped app** drives Claude Code only through an interactive
   pseudo-terminal, never headless (`-p`, `--print`, stream-json, SDK), and never
-  calls a model API directly. It never reads a credential store — not even to
+  calls a model API directly. It never reads a credential store â€” not even to
   check a file exists. Auth state comes only from asking the CLI.
 - **Developing this repo** is not restricted. Run any CLI command you need to
   understand its behaviour. The rule is about what ships, not how you learn.
@@ -106,12 +106,13 @@ docs/
 | [CONNECTORS](docs/CONNECTORS.md) | Why Shipyard holds no keys, and how it decides when to ask for an account |
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
 | [ADR-003](docs/ADR-003-library-distribution.md) | Why the library ships in the installer, and how the agent is told to use it |
+| [DEPLOY](docs/DEPLOY.md) | Whether local working means live working, and the checks that answer it |
 | [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
 | [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |
 | [RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md) | The run-and-preview loop |
 | [cli-bridge REPORT](packages/cli-bridge/REPORT.md) | Findings and fragile areas in the TUI parsers |
 
-The REPORT is worth reading before touching the parsers — several behaviours
+The REPORT is worth reading before touching the parsers â€” several behaviours
 there look like bugs in our code and are not.
 
 ## Building it
@@ -164,7 +165,7 @@ the CLI process and confirm the app recovers. It needs a logged-in Claude Code.
 
 ### Process boundaries
 
-The renderer is fully contained — `contextIsolation: true`, `nodeIntegration:
+The renderer is fully contained â€” `contextIsolation: true`, `nodeIntegration:
 false`, and a CSP that blocks remote code. Its entire capability surface is the
 typed API in [`packages/shared/src/ipc.ts`](packages/shared/src/ipc.ts), which is
 written before either side of the boundary and is the single source of truth for

@@ -1,0 +1,10 @@
+{
+  "name": "@shipyard/preflight",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Every way local working fails to mean live working, and the checks that find them first",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b", "test": "tsx harness/test-preflight.ts" },
+  "dependencies": { "@shipyard/shared": "*" }
+}

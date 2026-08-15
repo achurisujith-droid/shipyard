@@ -41,6 +41,9 @@
       "path": "packages/connectors"
     },
     {
+      "path": "packages/preflight"
+    },
+    {
       "path": "packages/project-state"
     },
     {
