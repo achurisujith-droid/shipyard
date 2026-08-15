@@ -20,6 +20,7 @@ import type { ComponentManifest, LibraryComponent } from '@shipyard/shared';
 
 import {
   browse,
+  catalogueMarkdown,
   checkProtectedPaths,
   compareVersions,
   coverage,
@@ -566,6 +567,58 @@ async function main(): Promise<void> {
   check(
     'and says who owns it',
     ownedPlan.conflicts.some((conflict) => /belongs to/.test(conflict.message)),
+  );
+
+  // ======================================================================
+  // The catalogue the agent reads
+  // ======================================================================
+  const catalogue = catalogueMarkdown(library, { url: 'https://example.com/library', planned: 44 });
+
+  check('the catalogue lists every component', library.every((c) => catalogue.includes(c.manifest.name)));
+  check('organised by problem rather than by id', /Use it when they ask to:/.test(catalogue));
+  check(
+    'because an agent will not search for a component id',
+    /upload/.test(catalogue) && /sign in/.test(catalogue),
+  );
+  check('the two tiers are separated', /Things a product owes its users/.test(catalogue) && /Jobs of work/.test(catalogue));
+  check(
+    'and the difference between them is stated',
+    /can stop a launch/.test(catalogue) && /somebody writes it by hand/.test(catalogue),
+  );
+
+  // The instruction this whole file exists to deliver.
+  check('the agent is told to check before building', /before writing anything/.test(catalogue));
+  check('and to say so rather than build its own', /say so rather than\s*building your own/.test(catalogue));
+  check(
+    'while being told that finding nothing is normal',
+    /Not finding something is the normal case/.test(catalogue),
+  );
+  check(
+    'and allowed to disagree, as long as it says so',
+    /say which and why/.test(catalogue) && /quietly writing a parallel version/.test(catalogue),
+  );
+
+  check(
+    'components that are not fully proven say so',
+    /Not fully proven/.test(catalogue),
+    'no provisional component was flagged',
+  );
+  check(
+    'planned components are counted but never named',
+    /44 more are planned and \*\*do not exist\*\*/.test(catalogue) && !/xlsx_import/.test(catalogue),
+  );
+  check('the page a person can browse is given', catalogue.includes('https://example.com/library'));
+  check('and it is marked as generated, so nobody edits it', /regenerated whenever/.test(catalogue));
+
+  const withInstalled = catalogueMarkdown(library, { installed: ['auth'] });
+  check('what is already installed is marked', /\*\*\(already installed\)\*\*/.test(withInstalled));
+  check(
+    'with the reminder not to rewrite it',
+    /Do not edit inside them/.test(withInstalled),
+  );
+  check(
+    'and a project with nothing installed gets no such section',
+    !/Already in this project/.test(catalogue),
   );
 
   // ======================================================================

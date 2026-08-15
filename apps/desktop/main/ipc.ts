@@ -198,6 +198,9 @@ export function registerIpc(
       // the renderer round-tripped it, so it is untrusted input again.
       const projectPath = safeProjectPath(plan.path);
       await intake.create({ ...plan, path: projectPath }, str(a, 1));
+      // The catalogue has to exist before the first message, or the skill that
+      // tells the agent to read it points at nothing.
+      await library.writeCatalogue(projectPath).catch(() => undefined);
 
       // Record what the wizard learned, then write the documents that describe
       // it. Without the first, everything downstream — rules, readiness, the

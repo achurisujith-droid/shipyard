@@ -51,7 +51,7 @@ const valid = { name: 'A skill', description: 'Does a thing', version: '1.0.0', 
 async function main(): Promise<void> {
   // ---------------------------------------------------------------- loading
   const skills = await loadSkills(skillsDir);
-  check('the shipped skills load', skills.length === 5, `${skills.length} found`);
+  check('the shipped skills load', skills.length === 6, `${skills.length} found`);
   check('every one has a version', skills.every((skill) => /^\d+\.\d+\.\d+$/.test(skill.version)));
   check('and a trust level', skills.every((skill) => Boolean(skill.trust)));
   check(
@@ -133,6 +133,14 @@ async function main(): Promise<void> {
     forPilot.join(', '),
   );
   check('everybody gets the stack', forConcept.includes('the-stack') && forPilot.includes('the-stack'));
+
+  // The library only saves work if the agent is told to look at it, and it is
+  // as worth looking at on day one as it is at launch.
+  check(
+    'every project is told to check the library first',
+    forConcept.includes('use-what-exists') && forPilot.includes('use-what-exists'),
+    `${forConcept.join(', ')} / ${forPilot.join(', ')}`,
+  );
   check('and how to talk to the owner', forConcept.includes('talking-to-a-non-programmer'));
 
   // The old rule read this off the filename prefix. This is the same answer,

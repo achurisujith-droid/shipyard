@@ -275,6 +275,26 @@ newer one created.
 Both are two-step like install, both roll back completely on failure, and both
 are reachable from the library screen.
 
+## How the agent knows to use it
+
+Two things are written into every project, and both work offline:
+
+- **`.shipyard/library.md`** — the whole catalogue, organised by problem in
+  plain language, regenerated whenever anything changes.
+- **The `use-what-exists` skill**, given to every project at every target mode:
+  read that file before building anything that sounds like a job many products
+  need, and say so rather than quietly building your own.
+
+That matters because the matcher only runs once, at project creation. Most
+requests arrive later — "can we also let people upload a spreadsheet?" turns up
+in message forty, which is exactly when the library is most likely to have it
+and least likely to be consulted. A standing instruction turns checking from an
+event into a habit.
+
+The catalogue states how many components are planned and do not exist, as a
+number and never as a list. Naming them would put things in front of the agent
+it cannot install.
+
 ## The hosted index
 
 [achurisujith-droid.github.io/shipyard/library](https://achurisujith-droid.github.io/shipyard/library/)

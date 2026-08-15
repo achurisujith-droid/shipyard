@@ -105,6 +105,7 @@ docs/
 | [COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md) | What makes something a component, what trust levels mean, where the code came from |
 | [CONNECTORS](docs/CONNECTORS.md) | Why Shipyard holds no keys, and how it decides when to ask for an account |
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
+| [ADR-003](docs/ADR-003-library-distribution.md) | Why the library ships in the installer, and how the agent is told to use it |
 | [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
 | [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |
 | [RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md) | The run-and-preview loop |

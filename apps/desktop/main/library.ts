@@ -2,6 +2,8 @@ import path from 'node:path';
 
 import {
   browse,
+  CATALOGUE_FILE,
+  catalogueMarkdown,
   checkProtectedPaths,
   coverage,
   find,
@@ -70,6 +72,10 @@ export interface LibraryOptions {
    * swallowed by the caller — stale documentation must not fail an install.
    */
   onChanged?: (projectPath: string, projectId?: string) => Promise<void>;
+  /** Where a person can browse the same list. Shown in the catalogue, never fetched. */
+  libraryUrl?: string;
+  /** How many components are planned but do not exist, so the agent is not told to install one. */
+  planned?: number;
 }
 
 export class Library {
@@ -122,6 +128,7 @@ export class Library {
     if (!result.installed) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.writeCatalogue(projectPath).catch(() => undefined);
     await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
 
     if (projectId && this.options.metadata) {
@@ -151,6 +158,7 @@ export class Library {
     if (!result.removed) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.writeCatalogue(projectPath).catch(() => undefined);
     await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
     if (projectId && this.options.metadata) {
       this.options.metadata.markComponentRemoved(projectId, id);
@@ -167,6 +175,7 @@ export class Library {
     if (!result.upgraded) return result;
 
     await this.refreshAgentInstructions(projectPath);
+    await this.writeCatalogue(projectPath).catch(() => undefined);
     await this.options.onChanged?.(projectPath, projectId).catch(() => undefined);
     if (projectId && this.options.metadata) {
       const record = await readInstallRecord(projectPath);
@@ -178,6 +187,30 @@ export class Library {
 
   async installed(projectPath: string): Promise<Record<string, string>> {
     return installedIn(projectPath).catch(() => ({}));
+  }
+
+  /**
+   * Write the catalogue into the project.
+   *
+   * Called after anything that changes what is installed, and at project
+   * creation, so the list the agent reads is never describing a library from
+   * three releases ago.
+   */
+  async writeCatalogue(projectPath: string): Promise<void> {
+    const { mkdir, writeFile } = await import('node:fs/promises');
+    const components = await this.load();
+    const installed = Object.keys(await installedIn(projectPath).catch(() => ({})));
+    const file = path.join(projectPath, CATALOGUE_FILE);
+    await mkdir(path.dirname(file), { recursive: true });
+    await writeFile(
+      file,
+      catalogueMarkdown(components, {
+        installed,
+        ...(this.options.libraryUrl ? { url: this.options.libraryUrl } : {}),
+        ...(this.options.planned ? { planned: this.options.planned } : {}),
+      }),
+      'utf8',
+    );
   }
 
   /** Has anything rewritten a component since it was installed? */

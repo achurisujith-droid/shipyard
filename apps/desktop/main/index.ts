@@ -16,6 +16,15 @@ import { ProjectRunner } from './project-runner';
 import { Store } from './store';
 import { Toolchain, toolchainRoot } from './toolchain';
 
+/**
+ * How many components are written down and do not exist.
+ *
+ * Stated in the catalogue so the agent never proposes installing one of them.
+ * A number rather than a list, deliberately: naming them would put things in
+ * front of the agent that it cannot have.
+ */
+const PLANNED_COMPONENTS = 44;
+
 /** Set by scripts/dev.mjs; absent in a packaged build. */
 const DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
 
@@ -98,6 +107,10 @@ function bootstrap(): void {
     // catalog has never heard of. Enforced at load rather than trusted.
     knownGates: GATES.map((gate) => gate.id),
     metadata: store.metadata,
+    // Shown in the catalogue so a person can browse it. Never fetched — the
+    // app installs from the copy inside the installer, offline.
+    libraryUrl: 'https://achurisujith-droid.github.io/shipyard/library/',
+    planned: PLANNED_COMPONENTS,
   });
   registerIpc(manager, store, runner, toolchain, intake, library, contracts, connectors);
   createWindow();
