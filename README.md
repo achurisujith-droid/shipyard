@@ -1,4 +1,4 @@
-﻿# Shipyard
+# Shipyard
 
 A desktop app that drives the user's own Claude Code installation.
 
@@ -107,6 +107,7 @@ docs/
 | [ADR-002](docs/ADR-002-bundled-runtimes.md) | Why the app carries its own Node and PostgreSQL |
 | [ADR-003](docs/ADR-003-library-distribution.md) | Why the library ships in the installer, and how the agent is told to use it |
 | [DEPLOY](docs/DEPLOY.md) | Whether local working means live working, and the checks that answer it |
+| [HOSTING](docs/HOSTING.md) | What Shipyard hosting its users' apps costs, and what is built so far |
 | [MILESTONE-2](docs/MILESTONE-2.md) | Electron shell acceptance results and deviations |
 | [PACKAGING](docs/PACKAGING.md) | How a commit becomes a download, and what breaks it |
 | [RUN-PREVIEW-FIX](docs/RUN-PREVIEW-FIX.md) | The run-and-preview loop |

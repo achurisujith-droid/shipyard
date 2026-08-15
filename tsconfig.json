@@ -44,6 +44,9 @@
       "path": "packages/preflight"
     },
     {
+      "path": "packages/hosting"
+    },
+    {
       "path": "packages/project-state"
     },
     {

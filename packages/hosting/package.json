@@ -1,0 +1,15 @@
+{
+  "name": "@shipyard/hosting",
+  "version": "0.1.0",
+  "private": true,
+  "description": "What gets uploaded, what never does, and what a deploy honestly claims",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -b",
+    "test": "tsx harness/test-hosting.ts"
+  },
+  "dependencies": {
+    "@shipyard/shared": "*"
+  }
+}
