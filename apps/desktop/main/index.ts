@@ -68,6 +68,7 @@ function bootstrap(): void {
       'resources',
       'skills',
     ),
+    componentsRoot(app.isPackaged, __dirname),
   );
   const catalogRoot = path.join(
     app.isPackaged ? process.resourcesPath : path.join(__dirname, '..', '..', '..', '..'),

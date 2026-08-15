@@ -45,7 +45,7 @@ macOS and Linux are not built yet.
 | Planning: `PROJECT.md`, `ARCHITECTURE.md`, four `shipyard.*.json` contracts | Built, regenerated whenever the project changes |
 | Skills registry, agent task composer | Built, 84 cases |
 | Connectors: 7 recipes, and when to ask for each account | Built, 48 cases ([CONNECTORS](docs/CONNECTORS.md)) |
-| Component library: 13 components | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 160 engine cases plus 229 contract tests passing against a real install |
+| Component library: 16 components, matched from requirements | Built ([COMPONENT-LIBRARY](docs/COMPONENT-LIBRARY.md)) — browse, install, update and remove; 166 engine cases plus 321 contract tests passing against a real install |
 | Windows installer | Built ([PACKAGING](docs/PACKAGING.md)) |
 | Guided install and sign-in | Written, never executed — needs a clean VM |
 | macOS, Linux | Not started |
@@ -81,6 +81,7 @@ packages/
   incident-engine/      failures -> fix tasks -> developer packets
   service-recommendations/  paid help, only when something justifies it
   component-library/    browse, plan and install verified components
+  component-matcher/    reads requirements and finds what already exists
   skills-registry/      what the agent is told, versioned and claim-checked
   task-composer/        plans, gaps and failing checks -> work the agent can do
   project-contracts/    ARCHITECTURE.md and the shipyard.*.json files

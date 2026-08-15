@@ -1,0 +1,42 @@
+{
+  "id": "csv_import",
+  "name": "Importing a spreadsheet",
+  "summary": "Let somebody upload a CSV, match up their column names to yours, and tell them exactly which rows are wrong.",
+  "version": "1.0.0",
+  "category": "data",
+  "trust": "verified",
+  "provenance": {
+    "origin": "authored",
+    "license": "MIT",
+    "changes": "Written for the Shipyard starter stack."
+  },
+  "stack": { "framework": "nextjs" },
+  "provides": [],
+  "satisfies": ["component_contract_tests_pass"],
+  "files": [
+    { "from": "files/parse.ts", "to": "src/components/csv_import/parse.ts", "role": "source" },
+    { "from": "files/mapping.ts", "to": "src/components/csv_import/mapping.ts", "role": "source" },
+    { "from": "files/import.ts", "to": "src/components/csv_import/import.ts", "role": "source" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/csv_import.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/csv_import.md", "role": "doc" }
+  ],
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "postInstall": [
+    "Describe your columns once, then show the mapping screen so people can match theirs to yours.",
+    "Show every bad row at once. Rejecting a 900-row file for one mistake, repeatedly, is how people give up."
+  ],
+  "limitations": [
+    "CSV and tab-separated files. Not .xlsx — a spreadsheet has formulas, several sheets and merged cells, and reading one properly is a different job.",
+    "It checks the shape of each value, not whether it is true. It cannot tell you the email address belongs to a real person.",
+    "Everything is held in memory, so very large files (hundreds of thousands of rows) need a different approach."
+  ],
+  "solves": [
+    "let people upload a spreadsheet of data",
+    "bulk import records from a csv file",
+    "import a list of customers or products",
+    "upload a csv and check it for mistakes",
+    "match spreadsheet columns to fields"
+  ],
+  "tier": "utility",
+  "keywords": ["csv", "spreadsheet", "import", "upload", "bulk", "excel", "data", "migrate", "mapping"]
+}

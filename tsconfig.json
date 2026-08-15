@@ -26,6 +26,9 @@
       "path": "packages/component-library"
     },
     {
+      "path": "packages/component-matcher"
+    },
+    {
       "path": "packages/skills-registry"
     },
     {

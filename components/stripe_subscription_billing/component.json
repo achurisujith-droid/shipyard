@@ -13,23 +13,79 @@
     "changes": "Reduced to subscriptions and reshaped for Next.js route handlers. The idempotency table and the raw-body handling are kept as they are, because both are the difference between a working integration and one that charges people twice.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["subscription_payments"],
-  "satisfies": ["component_contract_tests_pass", "stripe_webhook_signature_verified", "stripe_idempotency_test_passed"],
-  "requires": ["organization_tenancy", "rbac", "audit_logging"],
-  "files": [
-    { "from": "files/stripe.ts", "to": "src/components/stripe_subscription_billing/stripe.ts", "role": "source" },
-    { "from": "files/events.ts", "to": "src/components/stripe_subscription_billing/events.ts", "role": "source" },
-    { "from": "files/money.ts", "to": "src/components/stripe_subscription_billing/money.ts", "role": "source" },
-    { "from": "files/plans.ts", "to": "src/components/stripe_subscription_billing/plans.ts", "role": "example" },
-    { "from": "files/checkout-route.ts", "to": "src/app/api/billing/checkout/route.ts", "role": "source" },
-    { "from": "files/webhook-route.ts", "to": "src/app/api/billing/webhook/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/stripe_subscription_billing.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/stripe_subscription_billing.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "subscription_payments"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["Subscription", "WebhookEvent"] },
-  "dependencies": { "stripe": "^18.4.0" },
-  "scripts": { "test:webhooks": "vitest run tests/contracts/stripe_subscription_billing.test.ts" },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "stripe_webhook_signature_verified",
+    "stripe_idempotency_test_passed"
+  ],
+  "requires": [
+    "organization_tenancy",
+    "rbac",
+    "audit_logging"
+  ],
+  "files": [
+    {
+      "from": "files/stripe.ts",
+      "to": "src/components/stripe_subscription_billing/stripe.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/events.ts",
+      "to": "src/components/stripe_subscription_billing/events.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/money.ts",
+      "to": "src/components/stripe_subscription_billing/money.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/plans.ts",
+      "to": "src/components/stripe_subscription_billing/plans.ts",
+      "role": "example"
+    },
+    {
+      "from": "files/checkout-route.ts",
+      "to": "src/app/api/billing/checkout/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/webhook-route.ts",
+      "to": "src/app/api/billing/webhook/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/stripe_subscription_billing.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/stripe_subscription_billing.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "Subscription",
+      "WebhookEvent"
+    ]
+  },
+  "dependencies": {
+    "stripe": "^18.4.0"
+  },
+  "scripts": {
+    "test:webhooks": "vitest run tests/contracts/stripe_subscription_billing.test.ts"
+  },
   "env": [
     {
       "name": "STRIPE_SECRET_KEY",
@@ -53,9 +109,15 @@
       "secret": false
     }
   ],
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/components/stripe_subscription_billing/plans.ts", "description": "Your plans and what each one includes." }
+    {
+      "path": "src/components/stripe_subscription_billing/plans.ts",
+      "description": "Your plans and what each one includes."
+    }
   ],
   "postInstall": [
     "Create a Stripe account and a product with a recurring price.",
@@ -67,5 +129,25 @@
     "One plan at a time. No usage billing, no metered pricing, no proration handling beyond what Stripe does itself.",
     "Tax and invoicing are left to Stripe. Whether that satisfies your local rules is a question for an accountant, not this component."
   ],
-  "keywords": ["payment", "stripe", "billing", "subscription", "money", "charge", "checkout", "plan", "card"]
+  "solves": [
+    "take payment from customers",
+    "charge a monthly subscription",
+    "accept card payments",
+    "billing and invoices",
+    "customers pay by card",
+    "pay by card",
+    "let people pay online"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "payment",
+    "stripe",
+    "billing",
+    "subscription",
+    "money",
+    "charge",
+    "checkout",
+    "plan",
+    "card"
+  ]
 }

@@ -13,17 +13,45 @@
     "changes": "Reduced to the Next.js entry points and given a scrubbing layer that is testable without a Sentry account, since that is the part most likely to be got wrong.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs" },
-  "provides": ["error_monitoring"],
-  "satisfies": ["component_contract_tests_pass"],
-  "files": [
-    { "from": "files/scrub.ts", "to": "src/components/sentry_error_monitoring/scrub.ts", "role": "source" },
-    { "from": "files/monitoring.ts", "to": "src/components/sentry_error_monitoring/monitoring.ts", "role": "source" },
-    { "from": "files/test-event-route.ts", "to": "src/app/api/monitoring/test-event/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/sentry_error_monitoring.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/sentry_error_monitoring.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs"
+  },
+  "provides": [
+    "error_monitoring"
   ],
-  "dependencies": { "@sentry/nextjs": "^8.55.0" },
+  "satisfies": [
+    "component_contract_tests_pass"
+  ],
+  "files": [
+    {
+      "from": "files/scrub.ts",
+      "to": "src/components/sentry_error_monitoring/scrub.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/monitoring.ts",
+      "to": "src/components/sentry_error_monitoring/monitoring.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/test-event-route.ts",
+      "to": "src/app/api/monitoring/test-event/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/sentry_error_monitoring.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/sentry_error_monitoring.md",
+      "role": "doc"
+    }
+  ],
+  "dependencies": {
+    "@sentry/nextjs": "^8.55.0"
+  },
   "env": [
     {
       "name": "SENTRY_DSN",
@@ -46,9 +74,15 @@
       "secret": false
     }
   ],
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/components/sentry_error_monitoring/monitoring.ts", "description": "The tags you attach are yours — but leave the scrubbing alone." }
+    {
+      "path": "src/components/sentry_error_monitoring/monitoring.ts",
+      "description": "The tags you attach are yours — but leave the scrubbing alone."
+    }
   ],
   "postInstall": [
     "Create a free Sentry account and a project, then put its DSN in your .env file.",
@@ -59,5 +93,20 @@
     "Errors only. No performance tracing, no session replay — both of these record far more about your users.",
     "It reports errors your code throws. A page that renders the wrong number without failing is invisible to it."
   ],
-  "keywords": ["errors", "monitoring", "sentry", "crash", "alerts", "broken", "exceptions", "observability"]
+  "solves": [
+    "find out when the app breaks",
+    "get alerted about errors",
+    "track crashes in production"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "errors",
+    "monitoring",
+    "sentry",
+    "crash",
+    "alerts",
+    "broken",
+    "exceptions",
+    "observability"
+  ]
 }

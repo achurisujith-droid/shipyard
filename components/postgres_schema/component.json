@@ -10,16 +10,46 @@
     "license": "MIT",
     "changes": "Written for the Shipyard starter stack."
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["database_schema"],
-  "satisfies": ["component_contract_tests_pass", "database_migration_check"],
-  "files": [
-    { "from": "files/db.ts", "to": "src/components/postgres_schema/db.ts", "role": "source" },
-    { "from": "files/health-route.ts", "to": "src/app/api/health/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/postgres_schema.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/postgres_schema.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "database_schema"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["AppSetting"] },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "database_migration_check"
+  ],
+  "files": [
+    {
+      "from": "files/db.ts",
+      "to": "src/components/postgres_schema/db.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/health-route.ts",
+      "to": "src/app/api/health/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/postgres_schema.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/postgres_schema.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "AppSetting"
+    ]
+  },
   "env": [
     {
       "name": "DATABASE_URL",
@@ -28,10 +58,18 @@
       "secret": true
     }
   ],
-  "scripts": { "test:contracts": "vitest run tests/contracts" },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "scripts": {
+    "test:contracts": "vitest run tests/contracts"
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "prisma/schema.prisma", "description": "Your own tables go below the component markers." }
+    {
+      "path": "prisma/schema.prisma",
+      "description": "Your own tables go below the component markers."
+    }
   ],
   "postInstall": [
     "Run the database update so the new tables exist — Shipyard can do this for you."
@@ -40,5 +78,20 @@
     "The health check tells you the database answered. It does not tell you the data is correct.",
     "No backup or restore. That is a separate decision and a separate check."
   ],
-  "keywords": ["database", "postgres", "prisma", "tables", "storage", "save", "data"]
+  "solves": [
+    "keep information so it is still there tomorrow",
+    "save data in a database",
+    "store records permanently",
+    "health check to see if the app is up"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "database",
+    "postgres",
+    "prisma",
+    "tables",
+    "storage",
+    "save",
+    "data"
+  ]
 }

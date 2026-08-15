@@ -13,21 +13,70 @@
     "changes": "Generalised away from hiring into any consequential decision, and given an explicit state machine so 'a person reviewed it' is a recorded fact rather than an assumption.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["human_review_workflow"],
-  "satisfies": ["component_contract_tests_pass", "human_review_step_present", "decision_audit_trail_complete"],
-  "requires": ["organization_tenancy", "rbac", "audit_logging"],
-  "files": [
-    { "from": "files/review.ts", "to": "src/components/human_review_workflow/review.ts", "role": "source" },
-    { "from": "files/queue-route.ts", "to": "src/app/api/reviews/route.ts", "role": "source" },
-    { "from": "files/decide-route.ts", "to": "src/app/api/reviews/[id]/decide/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/human_review_workflow.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/human_review_workflow.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "human_review_workflow"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["ReviewItem"], "enums": ["ReviewStatus", "ReviewOutcome"] },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "human_review_step_present",
+    "decision_audit_trail_complete"
+  ],
+  "requires": [
+    "organization_tenancy",
+    "rbac",
+    "audit_logging"
+  ],
+  "files": [
+    {
+      "from": "files/review.ts",
+      "to": "src/components/human_review_workflow/review.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/queue-route.ts",
+      "to": "src/app/api/reviews/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/decide-route.ts",
+      "to": "src/app/api/reviews/[id]/decide/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/human_review_workflow.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/human_review_workflow.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "ReviewItem"
+    ],
+    "enums": [
+      "ReviewStatus",
+      "ReviewOutcome"
+    ]
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/app/(app)/reviews/", "description": "The screen your reviewers use. The rules about what counts as a review are not yours to change." }
+    {
+      "path": "src/app/(app)/reviews/",
+      "description": "The screen your reviewers use. The rules about what counts as a review are not yours to change."
+    }
   ],
   "postInstall": [
     "Anything your app decides automatically should create a review item instead of acting.",
@@ -38,5 +87,22 @@
     "No appeals process. If someone wants to contest a decision, you need one of those too.",
     "It does not decide which of your decisions are consequential enough to need review. That is your judgement."
   ],
-  "keywords": ["review", "human", "approval", "ai", "decision", "oversight", "moderation", "queue", "check"]
+  "solves": [
+    "a person checks the decision before it takes effect",
+    "approve or reject before it is final",
+    "review queue for a human",
+    "someone signs off on automated decisions"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "review",
+    "human",
+    "approval",
+    "ai",
+    "decision",
+    "oversight",
+    "moderation",
+    "queue",
+    "check"
+  ]
 }

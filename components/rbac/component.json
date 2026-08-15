@@ -13,20 +13,56 @@
     "changes": "Reduced to a single declarative matrix so the whole permission model can be read on one screen and tested exhaustively.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["role_permissions"],
-  "satisfies": ["component_contract_tests_pass", "rbac_permission_tests_pass", "protected_routes_enforced"],
-  "requires": ["organization_tenancy"],
-  "files": [
-    { "from": "files/permissions.ts", "to": "src/components/rbac/permissions.ts", "role": "source" },
-    { "from": "files/require-permission.ts", "to": "src/components/rbac/require-permission.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/rbac.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/rbac.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "role_permissions"
   ],
-  "scripts": { "test:permissions": "vitest run tests/contracts/rbac.test.ts" },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "rbac_permission_tests_pass",
+    "protected_routes_enforced"
+  ],
+  "requires": [
+    "organization_tenancy"
+  ],
+  "files": [
+    {
+      "from": "files/permissions.ts",
+      "to": "src/components/rbac/permissions.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/require-permission.ts",
+      "to": "src/components/rbac/require-permission.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/rbac.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/rbac.md",
+      "role": "doc"
+    }
+  ],
+  "scripts": {
+    "test:permissions": "vitest run tests/contracts/rbac.test.ts"
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/app/", "description": "Your own routes and pages. Put a requirePermission() check at the top of anything that needs one." }
+    {
+      "path": "src/app/",
+      "description": "Your own routes and pages. Put a requirePermission() check at the top of anything that needs one."
+    }
   ],
   "postInstall": [
     "Decide which of your actions need a permission, and put a requirePermission() check at the top of each one."
@@ -35,5 +71,22 @@
     "Three fixed roles. No custom roles you can define at runtime.",
     "Permissions apply to the whole organisation. There is no per-record sharing."
   ],
-  "keywords": ["permissions", "roles", "admin", "owner", "member", "access", "allowed", "rbac", "authorisation"]
+  "solves": [
+    "only admins can do certain things",
+    "different permissions for different people",
+    "control who is allowed to delete",
+    "roles like owner admin and member"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "permissions",
+    "roles",
+    "admin",
+    "owner",
+    "member",
+    "access",
+    "allowed",
+    "rbac",
+    "authorisation"
+  ]
 }

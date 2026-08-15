@@ -13,23 +13,73 @@
     "changes": "Redis and BullMQ replaced with the PostgreSQL the project already has, using SELECT … FOR UPDATE SKIP LOCKED. One fewer service to run, pay for and monitor, at the cost of throughput a small app will not reach.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["background_jobs"],
-  "satisfies": ["component_contract_tests_pass"],
-  "requires": ["postgres_schema"],
-  "files": [
-    { "from": "files/queue.ts", "to": "src/components/background_job_runner/queue.ts", "role": "source" },
-    { "from": "files/retry.ts", "to": "src/components/background_job_runner/retry.ts", "role": "source" },
-    { "from": "files/worker.ts", "to": "src/components/background_job_runner/worker.ts", "role": "source" },
-    { "from": "files/handlers.ts", "to": "src/components/background_job_runner/handlers.ts", "role": "example" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/background_job_runner.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/background_job_runner.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "background_jobs"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["Job"], "enums": ["JobStatus"] },
-  "scripts": { "worker": "tsx src/components/background_job_runner/worker.ts" },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "satisfies": [
+    "component_contract_tests_pass"
+  ],
+  "requires": [
+    "postgres_schema"
+  ],
+  "files": [
+    {
+      "from": "files/queue.ts",
+      "to": "src/components/background_job_runner/queue.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/retry.ts",
+      "to": "src/components/background_job_runner/retry.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/worker.ts",
+      "to": "src/components/background_job_runner/worker.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/handlers.ts",
+      "to": "src/components/background_job_runner/handlers.ts",
+      "role": "example"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/background_job_runner.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/background_job_runner.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "Job"
+    ],
+    "enums": [
+      "JobStatus"
+    ]
+  },
+  "scripts": {
+    "worker": "tsx src/components/background_job_runner/worker.ts"
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/components/background_job_runner/handlers.ts", "description": "Your jobs. Add one function per kind of work." }
+    {
+      "path": "src/components/background_job_runner/handlers.ts",
+      "description": "Your jobs. Add one function per kind of work."
+    }
   ],
   "postInstall": [
     "Add your jobs to handlers.ts.",
@@ -40,5 +90,22 @@
     "Jobs run at least once, not exactly once. A job that charges a card must check whether it already did.",
     "No scheduled or recurring jobs."
   ],
-  "keywords": ["background", "queue", "job", "worker", "async", "later", "retry", "cron", "task"]
+  "solves": [
+    "do slow work in the background",
+    "run a job after the page responds",
+    "retry something that failed",
+    "queue of tasks"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "background",
+    "queue",
+    "job",
+    "worker",
+    "async",
+    "later",
+    "retry",
+    "cron",
+    "task"
+  ]
 }

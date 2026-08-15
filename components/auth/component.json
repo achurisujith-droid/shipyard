@@ -13,25 +13,87 @@
     "changes": "Rewritten for Next.js route handlers. JWT access/refresh pairs replaced with opaque database-backed sessions so that signing someone out actually signs them out; the OWASP/NIST password rules and the lockout-in-the-database approach are kept.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["authentication"],
-  "satisfies": ["component_contract_tests_pass", "auth_login_works", "protected_routes_enforced"],
-  "requires": ["postgres_schema"],
-  "files": [
-    { "from": "files/password.ts", "to": "src/components/auth/password.ts", "role": "source" },
-    { "from": "files/session.ts", "to": "src/components/auth/session.ts", "role": "source" },
-    { "from": "files/lockout.ts", "to": "src/components/auth/lockout.ts", "role": "source" },
-    { "from": "files/current-user.ts", "to": "src/components/auth/current-user.ts", "role": "source" },
-    { "from": "files/register-route.ts", "to": "src/app/api/auth/register/route.ts", "role": "source" },
-    { "from": "files/login-route.ts", "to": "src/app/api/auth/login/route.ts", "role": "source" },
-    { "from": "files/logout-route.ts", "to": "src/app/api/auth/logout/route.ts", "role": "source" },
-    { "from": "files/me-route.ts", "to": "src/app/api/auth/me/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/auth.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/auth.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "authentication"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["User", "Session"] },
-  "dependencies": { "bcryptjs": "^3.0.2" },
-  "devDependencies": { "@types/bcryptjs": "^2.4.6" },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "auth_login_works",
+    "protected_routes_enforced"
+  ],
+  "requires": [
+    "postgres_schema"
+  ],
+  "files": [
+    {
+      "from": "files/password.ts",
+      "to": "src/components/auth/password.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/session.ts",
+      "to": "src/components/auth/session.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/lockout.ts",
+      "to": "src/components/auth/lockout.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/current-user.ts",
+      "to": "src/components/auth/current-user.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/register-route.ts",
+      "to": "src/app/api/auth/register/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/login-route.ts",
+      "to": "src/app/api/auth/login/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/logout-route.ts",
+      "to": "src/app/api/auth/logout/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/me-route.ts",
+      "to": "src/app/api/auth/me/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/auth.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/auth.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "User",
+      "Session"
+    ]
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6"
+  },
   "env": [
     {
       "name": "SESSION_SECRET",
@@ -48,9 +110,15 @@
       "devDefault": "5"
     }
   ],
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/app/(auth)/", "description": "Your own sign-in and sign-up pages. The routes they post to are installed for you." }
+    {
+      "path": "src/app/(auth)/",
+      "description": "Your own sign-in and sign-up pages. The routes they post to are installed for you."
+    }
   ],
   "postInstall": [
     "Set SESSION_SECRET in your .env file — Shipyard can generate one.",
@@ -61,5 +129,23 @@
     "It does not send a verification email — install the email component if you need one.",
     "Password reset is not included."
   ],
-  "keywords": ["login", "sign in", "signin", "signup", "account", "password", "users", "session", "authentication"]
+  "solves": [
+    "let people sign in with an email and password",
+    "create an account",
+    "log in and log out",
+    "register new users",
+    "password rules and locked accounts"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "login",
+    "sign in",
+    "signin",
+    "signup",
+    "account",
+    "password",
+    "users",
+    "session",
+    "authentication"
+  ]
 }

@@ -11,6 +11,8 @@ import {
   type SkillSummary,
 } from '@shipyard/shared';
 import { loadSkills, skillsFor, type SkillManifest } from '@shipyard/skills-registry';
+import { briefForAgent, matchRequirements } from '@shipyard/component-matcher';
+import { loadLibrary } from '@shipyard/component-library';
 
 /**
  * Turning three answers into a plan.
@@ -27,6 +29,8 @@ export class Intake {
   constructor(
     /** `resources/skills`, packaged or from the repo in development. */
     private readonly skillsDir: string,
+    /** The component library, so requirements can be matched against it. */
+    private readonly componentsDir?: string,
   ) {}
 
   async plan(answers: IntakeAnswers, projectPath: string): Promise<ProjectPlan> {
@@ -34,13 +38,15 @@ export class Intake {
     const phases = phasesFor(answers);
     const environment = environmentFor(answers);
 
+    const alreadyBuilt = await this.libraryBrief(answers);
+
     return {
       answers,
       path: projectPath,
       phases,
       environment,
       skills,
-      projectMarkdown: composeProjectMarkdown(answers, phases, environment),
+      projectMarkdown: composeProjectMarkdown(answers, phases, environment, alreadyBuilt),
       firstMessage: composeFirstMessage(answers),
     };
   }
@@ -72,6 +78,30 @@ export class Intake {
         // A missing skill file must not stop a user creating their project.
         // They lose a convention, not the ability to build.
       }
+    }
+  }
+
+  /**
+   * What the founder asked for that the library already has.
+   *
+   * This runs before a line of code is written, and its output goes into
+   * PROJECT.md — which is the first thing the agent reads. Without it the
+   * requirements reach the agent unannotated and it writes its own version of
+   * something that already exists with tests around it, and nobody finds out.
+   *
+   * A failure here is silent on purpose. Not being told about the library is a
+   * missed saving; failing to create somebody's project because a manifest is
+   * malformed is not a trade worth making.
+   */
+  private async libraryBrief(answers: IntakeAnswers): Promise<string> {
+    if (!this.componentsDir) return '';
+    try {
+      const library = await loadLibrary(this.componentsDir);
+      const requirements = [answers.idea, answers.requirementsDocument ?? ''].join('\n');
+      return briefForAgent(matchRequirements(requirements, library));
+    } catch (error) {
+      console.error('[intake] could not match requirements against the library:', error);
+      return '';
     }
   }
 
@@ -281,6 +311,7 @@ function composeProjectMarkdown(
   answers: IntakeAnswers,
   phases: BuildPhase[],
   environment: EnvironmentNeed[],
+  alreadyBuilt = '',
 ): string {
   const profile = AMBITION_PROFILES.find((p) => p.id === answers.ambition);
   const lines: string[] = [];
@@ -293,6 +324,12 @@ function composeProjectMarkdown(
   );
 
   lines.push('## What we are building', '', answers.idea.trim(), '');
+
+  // Placed directly under what is being built, and above the requirements, so
+  // it is read before the work is planned rather than after it is done.
+  if (alreadyBuilt.trim()) {
+    lines.push('## Some of this is already built', '', alreadyBuilt.trim(), '');
+  }
 
   if (answers.requirementsDocument?.trim()) {
     lines.push('## The requirements you provided', '', answers.requirementsDocument.trim(), '');

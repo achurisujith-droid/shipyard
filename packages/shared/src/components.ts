@@ -189,6 +189,29 @@ export interface ComponentManifest {
   limitations?: string[];
   /** Free-text search terms, in the words a founder would use. */
   keywords?: string[];
+
+  /**
+   * Problems this solves, written the way a founder would describe them in
+   * their own requirements.
+   *
+   * Not keywords and not a summary. These are the sentences somebody actually
+   * writes — "let candidates upload their CV", "email a receipt after payment"
+   * — and they are what the matcher reads. The distinction matters: a founder
+   * writing their requirements never uses the word "component", and rarely uses
+   * the word the component is named after.
+   */
+  solves?: string[];
+
+  /**
+   * The tier this belongs to.
+   *
+   * `capability` components answer an obligation the rulebook knows about —
+   * signing in, keeping customers apart. `utility` components are jobs of work
+   * — reading a PDF, generating an invoice. Both are installed the same way;
+   * the difference is that a missing capability blocks a launch and a missing
+   * utility just means somebody writes it by hand.
+   */
+  tier?: 'capability' | 'utility';
 }
 
 /** A manifest plus where it was loaded from. */

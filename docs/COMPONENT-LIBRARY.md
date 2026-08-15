@@ -1,7 +1,7 @@
 # The component library
 
-**Status:** built · **Last verified:** 2026-08-14 · 13 components · 160 engine
-cases · 229 contract tests passing against a real install
+**Status:** built · **Last verified:** 2026-08-15 · 16 components · 166 engine
+cases · 321 contract tests passing against a real install · [browse the library](https://achurisujith-droid.github.io/shipyard/library/)
 
 The claim Shipyard makes is that a founder gets further by installing proven
 pieces than by asking an agent to invent them. This is the part that has to make
@@ -25,6 +25,42 @@ Protected paths are **derived from the manifest**, not declared — every `sourc
 and `test` file is protected automatically, so a manifest cannot forget to
 protect its own implementation.
 
+## Two tiers
+
+**Capability** components answer an obligation the rulebook knows about —
+signing in, keeping customers apart. A missing one can block a launch.
+
+**Utility** components are jobs of work — reading a PDF, generating an invoice,
+importing a spreadsheet. A missing one just means somebody writes it by hand,
+worse.
+
+Both install the same way. The difference is what a gap costs.
+
+## Finding what you already have
+
+A library nobody searches is a library nobody uses. Every component declares
+`solves` — the sentences a founder would actually write — and the matcher reads
+their requirements against those before a line of code is written. The result
+goes into `PROJECT.md`, which is the first thing the agent reads:
+
+> Some of what has been asked for is already built and tested in the Shipyard
+> library. Do not write these from scratch.
+
+Matching is on `solves` only. Keywords were tried and removed: scoring them made
+"pdf" match the document *reader* in a sentence about generating a receipt, and
+"data" match the database in a sentence about training a language model. A
+single word is a coincidence often enough that treating one as evidence produces
+confident nonsense — and a matcher that is confidently wrong stops being read at
+all, including when it is right.
+
+So keywords serve the search box, where a person is looking and can judge, and
+`solves` serves the matcher, where nobody is. When a real phrasing is missed the
+fix is to add that sentence to the manifest, which is a change somebody can
+review — unlike a scoring weight.
+
+Weak matches are offered as "you might mean this" and are never handed to the
+agent as an instruction. The agent cannot tell that a suggestion was hedged.
+
 ## What is in it
 
 | Component | Trust | Provides |
@@ -42,6 +78,14 @@ protect its own implementation.
 | Taking payment | provisional | Stripe subscriptions |
 | Letting people upload files | provisional | Presigned uploads to S3-compatible storage |
 | Knowing when it breaks | provisional | Sentry, with aggressive scrubbing |
+
+**Utilities**
+
+| Component | Trust | Solves |
+| --- | --- | --- |
+| Reading uploaded documents | verified | Text out of a PDF or Word file, and saying so when there is none |
+| Making PDFs | verified | Invoices, receipts and reports from your own data |
+| Importing a spreadsheet | verified | Upload a CSV, map the columns, report every bad row at once |
 
 ## Trust levels mean exactly one thing
 
@@ -231,8 +275,23 @@ newer one created.
 Both are two-step like install, both roll back completely on failure, and both
 are reachable from the library screen.
 
+## The hosted index
+
+[achurisujith-droid.github.io/shipyard/library](https://achurisujith-droid.github.io/shipyard/library/)
+is generated from the manifests themselves, so it cannot list a component that
+does not exist or claim a trust level the manifest does not carry.
+
+It is somewhere to **look**. The app installs from the copy inside the
+installer, offline — nothing is fetched over the network and written into
+somebody's project. Doing that would need signing and integrity checking, and
+none of that is built.
+
 ## What is not built
 
+- **44 more components are written down and do not exist.** They are in
+  [ROADMAP](../components/ROADMAP.md), deliberately as prose rather than as
+  manifests with a `planned` flag — a catalogue that shows things you cannot
+  install is one nobody trusts twice.
 - **The starter template has never been deployed.** It builds and typechecks;
   `next build` against a real database and a real host is untested.
 - **The database-backed contract tests are opt-in** (`CONTRACT_TEST_DATABASE=1`)

@@ -49,6 +49,9 @@
     },
     {
       "path": "../../packages/connectors"
+    },
+    {
+      "path": "../../packages/component-matcher"
     }
   ]
 }

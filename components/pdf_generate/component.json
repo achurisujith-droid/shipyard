@@ -1,0 +1,46 @@
+{
+  "id": "pdf_generate",
+  "name": "Making PDFs",
+  "summary": "Turn your own data into a PDF somebody can download — an invoice, a receipt, a report.",
+  "version": "1.0.0",
+  "category": "data",
+  "trust": "verified",
+  "provenance": {
+    "origin": "authored",
+    "license": "MIT",
+    "changes": "Written for the Shipyard starter stack, using pdf-lib so it runs anywhere Node does with no native dependency to install."
+  },
+  "stack": { "framework": "nextjs" },
+  "provides": [],
+  "satisfies": ["component_contract_tests_pass"],
+  "files": [
+    { "from": "files/money.ts", "to": "src/components/pdf_generate/money.ts", "role": "source" },
+    { "from": "files/layout.ts", "to": "src/components/pdf_generate/layout.ts", "role": "source" },
+    { "from": "files/document.ts", "to": "src/components/pdf_generate/document.ts", "role": "source" },
+    { "from": "files/invoice.ts", "to": "src/components/pdf_generate/invoice.ts", "role": "example" },
+    { "from": "files/contract.test.ts", "to": "tests/contracts/pdf_generate.test.ts", "role": "test" },
+    { "from": "files/README.md", "to": "docs/components/pdf_generate.md", "role": "doc" }
+  ],
+  "dependencies": { "pdf-lib": "^1.17.1" },
+  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "extensionPoints": [
+    { "path": "src/components/pdf_generate/invoice.ts", "description": "Your documents. This one is an example — change it or add your own beside it." }
+  ],
+  "postInstall": [
+    "Serve the bytes with Content-Type: application/pdf and a Content-Disposition filename, or the browser shows it instead of saving it."
+  ],
+  "limitations": [
+    "Text and tables. No images, no charts, no custom fonts — the built-in fonts cover Latin alphabets only, so this cannot set Greek, Cyrillic, Arabic or CJK text.",
+    "It does not do the arithmetic for you beyond totalling the lines you give it. What VAT applies is your decision and your accountant's.",
+    "An invoice produced here is not automatically a legal invoice. What has to appear on one differs by country."
+  ],
+  "solves": [
+    "generate a pdf invoice",
+    "let people download a receipt as a pdf",
+    "produce a report as a pdf",
+    "create a printable document from data",
+    "export a summary to pdf"
+  ],
+  "tier": "utility",
+  "keywords": ["pdf", "invoice", "receipt", "report", "generate", "download", "print", "export", "document"]
+}

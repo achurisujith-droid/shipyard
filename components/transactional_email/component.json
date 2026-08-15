@@ -13,15 +13,42 @@
     "changes": "Rewritten behind a small provider interface so the vendor is one line rather than a rewrite, and given a console provider that is the default until a key is set.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs" },
-  "provides": ["transactional_email"],
-  "satisfies": ["component_contract_tests_pass", "transactional_email_sends"],
+  "stack": {
+    "framework": "nextjs"
+  },
+  "provides": [
+    "transactional_email"
+  ],
+  "satisfies": [
+    "component_contract_tests_pass",
+    "transactional_email_sends"
+  ],
   "files": [
-    { "from": "files/email.ts", "to": "src/components/transactional_email/email.ts", "role": "source" },
-    { "from": "files/providers.ts", "to": "src/components/transactional_email/providers.ts", "role": "source" },
-    { "from": "files/templates.ts", "to": "src/components/transactional_email/templates.ts", "role": "example" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/transactional_email.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/transactional_email.md", "role": "doc" }
+    {
+      "from": "files/email.ts",
+      "to": "src/components/transactional_email/email.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/providers.ts",
+      "to": "src/components/transactional_email/providers.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/templates.ts",
+      "to": "src/components/transactional_email/templates.ts",
+      "role": "example"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/transactional_email.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/transactional_email.md",
+      "role": "doc"
+    }
   ],
   "env": [
     {
@@ -52,10 +79,18 @@
       "secret": false
     }
   ],
-  "scripts": { "test:email": "vitest run tests/contracts/transactional_email.test.ts" },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "scripts": {
+    "test:email": "vitest run tests/contracts/transactional_email.test.ts"
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/components/transactional_email/templates.ts", "description": "Your emails. This file is yours to edit." }
+    {
+      "path": "src/components/transactional_email/templates.ts",
+      "description": "Your emails. This file is yours to edit."
+    }
   ],
   "postInstall": [
     "Until you set EMAIL_API_KEY, emails are printed to the console instead of sent. That is deliberate.",
@@ -66,5 +101,21 @@
     "No delivery tracking, opens or bounces — those come from the provider's own dashboard.",
     "The Resend provider is written against their documented API and has not been run against a live account here."
   ],
-  "keywords": ["email", "send", "notification", "resend", "smtp", "message", "welcome", "reset"]
+  "solves": [
+    "send an email to the user",
+    "email a receipt or confirmation",
+    "welcome email when someone signs up",
+    "notify people by email"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "email",
+    "send",
+    "notification",
+    "resend",
+    "smtp",
+    "message",
+    "welcome",
+    "reset"
+  ]
 }

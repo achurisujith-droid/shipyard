@@ -1,0 +1,11 @@
+{
+  "name": "@shipyard/component-matcher",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reads requirements in the founder's words and finds what the library already has",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": { "build": "tsc -b", "test": "tsx harness/test-matcher.ts" },
+  "dependencies": { "@shipyard/shared": "*" },
+  "devDependencies": { "@shipyard/component-library": "*" }
+}

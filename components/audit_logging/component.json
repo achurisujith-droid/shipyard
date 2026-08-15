@@ -13,21 +13,64 @@
     "changes": "Added redaction of the recorded values and made the table append-only in the application layer, because an audit log that can be edited is not evidence of anything.",
     "adaptedAt": "2026-08-14"
   },
-  "stack": { "framework": "nextjs", "orm": "prisma", "database": "postgresql" },
-  "provides": ["audit_logging"],
-  "satisfies": ["component_contract_tests_pass", "audit_log_records_access"],
-  "requires": ["organization_tenancy", "rbac"],
-  "files": [
-    { "from": "files/audit.ts", "to": "src/components/audit_logging/audit.ts", "role": "source" },
-    { "from": "files/redact.ts", "to": "src/components/audit_logging/redact.ts", "role": "source" },
-    { "from": "files/audit-route.ts", "to": "src/app/api/audit/route.ts", "role": "source" },
-    { "from": "files/contract.test.ts", "to": "tests/contracts/audit_logging.test.ts", "role": "test" },
-    { "from": "files/README.md", "to": "docs/components/audit_logging.md", "role": "doc" }
+  "stack": {
+    "framework": "nextjs",
+    "orm": "prisma",
+    "database": "postgresql"
+  },
+  "provides": [
+    "audit_logging"
   ],
-  "schema": { "file": "files/schema.prisma", "models": ["AuditEvent"] },
-  "contractTest": { "command": "npm run test:contracts", "expect": "fast" },
+  "satisfies": [
+    "component_contract_tests_pass",
+    "audit_log_records_access"
+  ],
+  "requires": [
+    "organization_tenancy",
+    "rbac"
+  ],
+  "files": [
+    {
+      "from": "files/audit.ts",
+      "to": "src/components/audit_logging/audit.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/redact.ts",
+      "to": "src/components/audit_logging/redact.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/audit-route.ts",
+      "to": "src/app/api/audit/route.ts",
+      "role": "source"
+    },
+    {
+      "from": "files/contract.test.ts",
+      "to": "tests/contracts/audit_logging.test.ts",
+      "role": "test"
+    },
+    {
+      "from": "files/README.md",
+      "to": "docs/components/audit_logging.md",
+      "role": "doc"
+    }
+  ],
+  "schema": {
+    "file": "files/schema.prisma",
+    "models": [
+      "AuditEvent"
+    ]
+  },
+  "contractTest": {
+    "command": "npm run test:contracts",
+    "expect": "fast"
+  },
   "extensionPoints": [
-    { "path": "src/components/audit_logging/actions.ts", "description": "Name your own auditable actions here." }
+    {
+      "path": "src/components/audit_logging/actions.ts",
+      "description": "Name your own auditable actions here."
+    }
   ],
   "postInstall": [
     "Call audit() from anything that changes data someone might later ask about."
@@ -36,5 +79,21 @@
     "Append-only is enforced by this component, not by the database. Someone with direct database access can still delete rows.",
     "It records what your code tells it. An action that never calls audit() leaves no trace."
   ],
-  "keywords": ["audit", "log", "history", "who did what", "trail", "compliance", "gdpr", "accountability"]
+  "solves": [
+    "record who did what and when",
+    "a history of changes",
+    "see who deleted a record",
+    "activity log for compliance"
+  ],
+  "tier": "capability",
+  "keywords": [
+    "audit",
+    "log",
+    "history",
+    "who did what",
+    "trail",
+    "compliance",
+    "gdpr",
+    "accountability"
+  ]
 }

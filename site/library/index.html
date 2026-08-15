@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shipyard component library</title>
+<meta name="description" content="16 tested components a Shipyard project can install instead of generating.">
+<style>
+  :root { --bg:#fff; --fg:#14181f; --muted:#5b6472; --line:#e3e7ec; --accent:#1f6f43; --warn:#8a5a00; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#101318; --fg:#e9edf3; --muted:#99a3b1; --line:#262c35; --accent:#6dd39b; --warn:#e0b25e; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:3rem 1.5rem; background:var(--bg); color:var(--fg);
+         font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width: 60rem; margin: 0 auto; }
+  h1 { font-size:2rem; letter-spacing:-0.02em; margin:0 0 .5rem; }
+  h2 { font-size:1.25rem; margin:3rem 0 .25rem; }
+  p.lede, p.tier-note { color:var(--muted); max-width:44rem; }
+  .grid { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill,minmax(19rem,1fr)); margin-top:1.5rem; }
+  .card { border:1px solid var(--line); border-radius:.75rem; padding:1.25rem; display:flex; flex-direction:column; gap:.5rem; }
+  .card header { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; }
+  .card h3 { font-size:1rem; margin:0; }
+  .summary { margin:0; color:var(--muted); font-size:.925rem; }
+  .solves { margin:0; font-size:.85rem; color:var(--muted); }
+  .solves span { text-transform:uppercase; letter-spacing:.06em; font-size:.7rem; display:block; }
+  .solves em { font-style:normal; color:var(--fg); }
+  .trust { font-size:.7rem; text-transform:uppercase; letter-spacing:.06em; padding:.1rem .5rem; border-radius:999px; white-space:nowrap; }
+  .trust-verified { background:color-mix(in oklab, var(--accent) 18%, transparent); color:var(--accent); }
+  .trust-provisional { background:color-mix(in oklab, var(--warn) 18%, transparent); color:var(--warn); }
+  .trust-experimental { background:var(--line); color:var(--muted); }
+  details { font-size:.85rem; color:var(--muted); }
+  details ul { margin:.5rem 0 0; padding-left:1.1rem; }
+  .card footer { margin-top:auto; padding-top:.75rem; border-top:1px solid var(--line);
+                 display:flex; gap:.75rem; font-size:.75rem; color:var(--muted); }
+  code { font-family:ui-monospace,"Cascadia Mono",Menlo,monospace; }
+  .note { border-left:3px solid var(--line); padding-left:1rem; color:var(--muted); font-size:.925rem; max-width:44rem; }
+  a { color:var(--accent); }
+  table { border-collapse:collapse; width:100%; font-size:.9rem; margin-top:1rem; }
+  th,td { text-align:left; padding:.4rem .6rem; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; font-size:.75rem; text-transform:uppercase; letter-spacing:.06em; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Component library</h1>
+  <p class="lede">
+    16 tested pieces a Shipyard project can install instead of
+    asking an agent to invent them. Each one ships with its own tests, and those
+    tests run inside the project it was installed into.
+  </p>
+
+  <p class="note">
+    This page is somewhere to look. The app installs from the copy inside the
+    installer, offline — nothing is fetched over the network and written into
+    your project.
+  </p>
+
+  <h2>Capabilities</h2>
+  <p class="tier-note">Things a product owes its users. A missing one can block a launch.</p>
+  <div class="grid">
+      <article class="card" id="admin_dashboard_shell">
+        <header>
+          <h3>A way for you to see what is going on</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">An admin area with a navigation menu that only shows what the person signed in is actually allowed to open.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>an admin area to see what is going on</em>, <em>back office for staff</em>, <em>internal dashboard</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Hiding a menu item is not security. The page behind it still has to check the permission itself, which is why the guard is a separate function you have to call.</li><li>Plain HTML and CSS. No component framework, no charts, no data tables.</li></ul></details>
+        <footer>
+          <code>admin_dashboard_shell</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="audit_logging">
+        <header>
+          <h3>A record of who did what</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">An append-only log of every meaningful action, so you can answer 'who changed this?' months later.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>record who did what and when</em>, <em>a history of changes</em>, <em>see who deleted a record</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Append-only is enforced by this component, not by the database. Someone with direct database access can still delete rows.</li><li>It records what your code tells it. An action that never calls audit() leaves no trace.</li></ul></details>
+        <footer>
+          <code>audit_logging</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="auth">
+        <header>
+          <h3>Signing in</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Email and password sign-in with sessions people can be signed out of, and the password rules that stop the obvious attacks.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>let people sign in with an email and password</em>, <em>create an account</em>, <em>log in and log out</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Email and password only. No Google or Microsoft sign-in, and no two-factor.</li><li>It does not send a verification email — install the email component if you need one.</li><li>Password reset is not included.</li></ul></details>
+        <footer>
+          <code>auth</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="background_job_runner">
+        <header>
+          <h3>Work that happens in the background</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Jobs that run after the page has already responded, and retry themselves when they fail.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>do slow work in the background</em>, <em>run a job after the page responds</em>, <em>retry something that failed</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Built on your database rather than a dedicated queue. Fine into the thousands of jobs an hour; not a replacement for a real queue at high volume.</li><li>Jobs run at least once, not exactly once. A job that charges a card must check whether it already did.</li><li>No scheduled or recurring jobs.</li></ul></details>
+        <footer>
+          <code>background_job_runner</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="human_review_workflow">
+        <header>
+          <h3>A person checking the decisions</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">When your app makes a decision about someone, a person reviews it before it takes effect — and the reasoning is kept.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>a person checks the decision before it takes effect</em>, <em>approve or reject before it is final</em>, <em>review queue for a human</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>It makes the review happen and records it. It cannot make the review thoughtful.</li><li>No appeals process. If someone wants to contest a decision, you need one of those too.</li><li>It does not decide which of your decisions are consequential enough to need review. That is your judgement.</li></ul></details>
+        <footer>
+          <code>human_review_workflow</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="organization_tenancy">
+        <header>
+          <h3>Keeping customers separate</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Each customer's data belongs to their own organisation, and one customer can never read another's.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>each customer only sees their own data</em>, <em>separate one company from another</em>, <em>teams or workspaces</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Separation is enforced in the application, not by the database. A query written without scopedWhere() can still read across organisations — which is why the guard exists and why the tests check it.</li><li>No per-row sharing between organisations.</li></ul></details>
+        <footer>
+          <code>organization_tenancy</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="postgres_schema">
+        <header>
+          <h3>Database foundation</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Somewhere to keep your information, with a health check that tells you when it is not reachable.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>keep information so it is still there tomorrow</em>, <em>save data in a database</em>, <em>store records permanently</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>The health check tells you the database answered. It does not tell you the data is correct.</li><li>No backup or restore. That is a separate decision and a separate check.</li></ul></details>
+        <footer>
+          <code>postgres_schema</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="privacy_export_delete">
+        <header>
+          <h3>Handing someone their data back, or deleting it</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">When a person asks for a copy of their data or asks you to erase it, you can do both — and prove you did.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>let someone download all their data</em>, <em>delete a person's data when they ask</em>, <em>gdpr data request</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>It deletes from your database. Copies in backups, in your email provider, in your analytics or in a spreadsheet on somebody's laptop are not touched.</li><li>The registry is filled in by you. Nothing can detect a table you forgot to list.</li><li>Whether your handling satisfies the law where you operate is a question for a lawyer, not this component.</li></ul></details>
+        <footer>
+          <code>privacy_export_delete</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="rbac">
+        <header>
+          <h3>Who is allowed to do what</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Roles and permissions, so an ordinary member cannot do the things only an owner should.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>only admins can do certain things</em>, <em>different permissions for different people</em>, <em>control who is allowed to delete</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Three fixed roles. No custom roles you can define at runtime.</li><li>Permissions apply to the whole organisation. There is no per-record sharing.</li></ul></details>
+        <footer>
+          <code>rbac</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="s3_file_storage">
+        <header>
+          <h3>Letting people upload files</h3>
+          <span class="trust trust-provisional" title="Installs and its logic is tested, but part of it needs a real account to prove.">provisional</span>
+        </header>
+        <p class="summary">Uploads that go straight to storage rather than through your app, with limits on what and how big.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>let people upload files</em>, <em>store uploaded documents and images</em>, <em>attach a file to a record</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Not run against a live bucket here. The key handling and the limits are tested; the round trip is not.</li><li>No virus scanning. If strangers can upload, you need that as well.</li><li>No image resizing or thumbnails.</li></ul></details>
+        <footer>
+          <code>s3_file_storage</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="sentry_error_monitoring">
+        <header>
+          <h3>Knowing when it breaks</h3>
+          <span class="trust trust-provisional" title="Installs and its logic is tested, but part of it needs a real account to prove.">provisional</span>
+        </header>
+        <p class="summary">Errors your users hit get reported to you, with enough detail to fix them and no personal data attached.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>find out when the app breaks</em>, <em>get alerted about errors</em>, <em>track crashes in production</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Not verified against a live Sentry account here. The scrubbing is tested; the delivery is not. That is what the test event is for.</li><li>Errors only. No performance tracing, no session replay — both of these record far more about your users.</li><li>It reports errors your code throws. A page that renders the wrong number without failing is invisible to it.</li></ul></details>
+        <footer>
+          <code>sentry_error_monitoring</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="stripe_subscription_billing">
+        <header>
+          <h3>Taking payment</h3>
+          <span class="trust trust-provisional" title="Installs and its logic is tested, but part of it needs a real account to prove.">provisional</span>
+        </header>
+        <p class="summary">Subscriptions through Stripe, with payment messages proved genuine before they are believed and never counted twice.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>take payment from customers</em>, <em>charge a monthly subscription</em>, <em>accept card payments</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Not run against a live Stripe account here. The signature check and the double-charge protection are tested with Stripe's own test helpers; the money has never moved.</li><li>One plan at a time. No usage billing, no metered pricing, no proration handling beyond what Stripe does itself.</li><li>Tax and invoicing are left to Stripe. Whether that satisfies your local rules is a question for an accountant, not this component.</li></ul></details>
+        <footer>
+          <code>stripe_subscription_billing</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="transactional_email">
+        <header>
+          <h3>Emailing your users</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Send the emails your app has to send, with a provider you can change and a development mode that never emails a real person.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>send an email to the user</em>, <em>email a receipt or confirmation</em>, <em>welcome email when someone signs up</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Sends one email at a time. Not a newsletter tool.</li><li>No delivery tracking, opens or bounces — those come from the provider's own dashboard.</li><li>The Resend provider is written against their documented API and has not been run against a live account here.</li></ul></details>
+        <footer>
+          <code>transactional_email</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+  </div>
+
+  <h2>Utilities</h2>
+  <p class="tier-note">Jobs of work. A missing one just means somebody writes it by hand.</p>
+  <div class="grid">
+      <article class="card" id="csv_import">
+        <header>
+          <h3>Importing a spreadsheet</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Let somebody upload a CSV, match up their column names to yours, and tell them exactly which rows are wrong.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>let people upload a spreadsheet of data</em>, <em>bulk import records from a csv file</em>, <em>import a list of customers or products</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>CSV and tab-separated files. Not .xlsx — a spreadsheet has formulas, several sheets and merged cells, and reading one properly is a different job.</li><li>It checks the shape of each value, not whether it is true. It cannot tell you the email address belongs to a real person.</li><li>Everything is held in memory, so very large files (hundreds of thousands of rows) need a different approach.</li></ul></details>
+        <footer>
+          <code>csv_import</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="document_text_extract">
+        <header>
+          <h3>Reading uploaded documents</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Pull the text out of a PDF or Word file somebody uploaded, and say plainly when it cannot be done.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>read the text out of an uploaded PDF</em>, <em>pull text from a Word document somebody uploaded</em>, <em>let candidates upload their CV and read it</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>It reads text that is already text. A scanned page is a picture of words, and this returns nothing for it — it says so rather than returning an empty string.</li><li>No OCR. If you need to read scans, that is a paid service and a separate decision.</li><li>It gives you the words, not the meaning. Working out which bit is somebody's phone number is your job.</li><li>Old .doc files (Word 97) are not supported. Only .docx.</li></ul></details>
+        <footer>
+          <code>document_text_extract</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+      <article class="card" id="pdf_generate">
+        <header>
+          <h3>Making PDFs</h3>
+          <span class="trust trust-verified" title="Its own tests were run against a real install and passed.">verified</span>
+        </header>
+        <p class="summary">Turn your own data into a PDF somebody can download — an invoice, a receipt, a report.</p>
+        <p class="solves"><span>Use it when you need to</span> <em>generate a pdf invoice</em>, <em>let people download a receipt as a pdf</em>, <em>produce a report as a pdf</em>.</p>
+        <details><summary>What it does not do</summary><ul><li>Text and tables. No images, no charts, no custom fonts — the built-in fonts cover Latin alphabets only, so this cannot set Greek, Cyrillic, Arabic or CJK text.</li><li>It does not do the arithmetic for you beyond totalling the lines you give it. What VAT applies is your decision and your accountant's.</li><li>An invoice produced here is not automatically a legal invoice. What has to appear on one differs by country.</li></ul></details>
+        <footer>
+          <code>pdf_generate</code>
+          <span>v1.0.0</span>
+          <span>MIT</span>
+        </footer>
+      </article>
+  </div>
+
+  <h2>What the labels mean</h2>
+  <table>
+    <tr><th>Label</th><th>What it means</th></tr>
+    <tr><td><span class="trust trust-verified">verified</span></td><td>Its own tests were run against a real install and passed.</td></tr><tr><td><span class="trust trust-provisional">provisional</span></td><td>Installs and its logic is tested, but part of it needs a real account to prove.</td></tr><tr><td><span class="trust trust-experimental">experimental</span></td><td>Here to be looked at. Not relied on.</td></tr>
+  </table>
+  <p class="tier-note">
+    <strong>verified</strong> means something ran. It is not a judgement about how
+    good the code looks — the contract tests were executed against a real install
+    of the starter template and passed, and nothing else earns it.
+  </p>
+
+  <h2>Not built yet</h2>
+  <p class="tier-note">
+    44 more are written down as intentions in
+    <a href="https://github.com/achurisujith-droid/shipyard/blob/main/components/ROADMAP.md">the roadmap</a>.
+    None of them exist, and none are listed above — a catalogue that shows things
+    you cannot install is a catalogue nobody trusts twice.
+  </p>
+
+  <p class="tier-note" style="margin-top:3rem">
+    <a href="https://github.com/achurisujith-droid/shipyard/blob/main/docs/COMPONENT-LIBRARY.md">How the library works</a> ·
+    <a href="../">Shipyard</a>
+  </p>
+</main>
+</body>
+</html>
